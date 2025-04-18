@@ -1,14 +1,15 @@
 import OpenAI from "openai";
 import { AnalysisResult, ApprovedRequirement, RejectedRequirement } from "@shared/schema";
 import { GenEdRequirement } from "./genEdAnalyzer";
+import { config } from "../config";
 
 // Initialize the OpenAI client
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: config.openai.apiKey,
 });
 
 // The newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const MODEL = "gpt-4o";
+const MODEL = config.openai.model;
 
 /**
  * Uses advanced AI to analyze syllabus text against Gen Ed requirements
@@ -22,7 +23,7 @@ export async function analyzeWithOpenAI(
 ): Promise<Partial<AnalysisResult>> {
   try {
     // Make sure OpenAI API key is available
-    if (!process.env.OPENAI_API_KEY) {
+    if (!config.openai.apiKey) {
       throw new Error("OpenAI API key is missing. Please set the OPENAI_API_KEY environment variable.");
     }
     
