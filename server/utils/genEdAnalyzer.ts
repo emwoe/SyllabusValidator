@@ -46,23 +46,7 @@ export const genEdRequirements: GenEdRequirement[] = [
       "Authentic language materials"
     ]
   },
-  {
-    name: "Oral Communication",
-    description: "Students develop professional speech structure and delivery techniques for effective presentations.",
-    slos: [
-      "Employ a professional speech structure that reinforces the central message of the presentation.",
-      "Communicate a central message effectively through insightful word choice and creative selection of appropriate rhetorical devices.",
-      "Deploy a variety of appropriate delivery tools to engage the audience.",
-      "Offer varied and relevant evidence to support their credibility."
-    ],
-    keywords: ["speech", "presentation", "delivery", "audience", "rhetorical", "credibility", "oral"],
-    requiredElements: [
-      "At least 3 major presentations",
-      "Speech structure instruction",
-      "Delivery techniques practice",
-      "Audience engagement strategies"
-    ]
-  },
+
 
   {
     name: "Natural Sciences",
