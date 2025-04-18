@@ -14,24 +14,6 @@ export interface GenEdRequirement {
 // Load the Gen Ed requirements data
 export const genEdRequirements: GenEdRequirement[] = [
   {
-    name: "Freshmen Seminar",
-    description: "Students will join a community of learners and actively engage in academic and co-curricular exploration.",
-    slos: [
-      "Identify assumptions rooted in a variety of perspectives.",
-      "Interpret and evaluate issues, evidence, and sources.",
-      "Communicate effectively about multiple perspectives.",
-      "Reflect on and apply knowledge developed in the classroom and co-curricular experiences."
-    ],
-    keywords: ["community", "learners", "academic", "co-curricular", "exploration", "critical thinking", "social justice"],
-    requiredElements: [
-      "Community of learners",
-      "Academic exploration",
-      "Co-curricular activities",
-      "Social justice components",
-      "Critical thinking development"
-    ]
-  },
-  {
     name: "Quantitative Reasoning",
     description: "Students must use mathematical, statistical, and/or computational methods to analyze and solve problems involving quantitative information.",
     slos: [
@@ -81,44 +63,7 @@ export const genEdRequirements: GenEdRequirement[] = [
       "Audience engagement strategies"
     ]
   },
-  {
-    name: "Writing 1",
-    description: "Students learn to read, understand, and use a variety of text to support various writing goals.",
-    slos: [
-      "Read, understand, and use a variety of text to support various writing goals.",
-      "Identify and demonstrate an awareness of the writing process through successive drafts and revisions.",
-      "Analyze and respond to various writing situations and demonstrate appropriate rhetorical and writing choices.",
-      "Demonstrate an understanding of audience and genre conventions within their writing.",
-      "Analyze and respond to substantive issues in their writing that show global improvement through substantial and successive revision."
-    ],
-    keywords: ["writing process", "drafts", "revision", "rhetorical", "audience", "genre conventions", "text analysis"],
-    requiredElements: [
-      "Reading strategies for difficult texts",
-      "Multiple drafting and revision",
-      "Rhetorical analysis components",
-      "Audience awareness development",
-      "Substantive revision processes"
-    ]
-  },
-  {
-    name: "Writing 2",
-    description: "Students analyze and understand how and why different discourse communities produce research using various conventions.",
-    slos: [
-      "Analyze and understand how and why different discourse communities produce research using various conventions.",
-      "Find and use appropriate resources to support inquiry-based research.",
-      "Adapt research practices and compose successive and appropriate writing tasks to varied rhetorical situations.",
-      "Understand and respond to substantive issues in their writing that show global improvement through substantial and successive revision.",
-      "Analyze and produce appropriate texts for a non-academic audience to demonstrate genre awareness through rhetorical conventions."
-    ],
-    keywords: ["research", "discourse communities", "inquiry-based", "rhetorical situations", "genre awareness", "revision", "non-academic audience"],
-    requiredElements: [
-      "Research-based writing assignments",
-      "Source evaluation exercises",
-      "Writing for different audiences",
-      "Progressive drafting process",
-      "Non-academic writing tasks"
-    ]
-  },
+
   {
     name: "Natural Sciences",
     description: "Students learn scientific principles and methods to understand the natural world.",
