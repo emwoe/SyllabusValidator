@@ -233,38 +233,49 @@ export default function SyllabusView() {
         <div className="lg:col-span-2">
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-medium">Syllabus Content with Commentary</CardTitle>
+              <CardTitle className="text-lg font-medium flex items-center gap-2">
+                <FileText size={18} />
+                Syllabus Document
+                {analysis.fileType && (
+                  <Badge variant="outline" className="uppercase text-xs ml-1">
+                    {analysis.fileType.replace('.', '')}
+                  </Badge>
+                )}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {isLoadingSyllabus ? (
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-5/6" />
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <Skeleton className="h-5 w-1/3" />
+                    <Skeleton className="h-5 w-16" />
+                  </div>
+                  <Skeleton className="h-64 w-full" />
                 </div>
               ) : syllabusText ? (
                 <div className="document-viewer">
                   <div className="flex items-center justify-between mb-3 pb-2 border-b">
                     <div className="flex items-center">
-                      <FileText size={18} className="mr-2 text-neutral-600" />
-                      <span className="font-medium">{analysis.fileName}</span>
+                      <span className="font-medium text-gray-700">Original document content</span>
                     </div>
-                    {fileType && (
-                      <Badge variant="outline" className="uppercase text-xs">
-                        {fileType.replace('.', '')}
-                      </Badge>
-                    )}
                   </div>
                   
-                  <div className="p-6 bg-white rounded-md border shadow-sm max-h-[600px] overflow-y-auto">
+                  <div className="p-6 bg-white rounded-md border shadow-sm max-h-[600px] overflow-y-auto document-scroll">
                     {/* Document content with styling based on file type */}
                     <div className={`
-                      ${fileType?.includes('.pdf') ? 'font-sans' : 'font-mono'} 
+                      ${fileType?.includes('pdf') ? 'font-sans' : 'font-mono'} 
                       text-sm whitespace-pre-wrap leading-relaxed
                     `}>
                       {syllabusText}
+                    </div>
+                  </div>
+                  
+                  <div className="mt-3 flex justify-between items-center text-xs text-gray-500">
+                    <div>
+                      File size: {(analysis.fileSize / 1024).toFixed(1)} KB
+                    </div>
+                    <div>
+                      Uploaded: {formatDate(new Date(analysis.uploadDate))}
                     </div>
                   </div>
                 </div>
@@ -275,6 +286,9 @@ export default function SyllabusView() {
                   <p className="text-neutral-400 text-sm mt-1">
                     The document may have been uploaded before content storage was implemented
                   </p>
+                  <Button variant="outline" className="mt-4" size="sm" asChild>
+                    <Link href="/home">Upload New Syllabus</Link>
+                  </Button>
                 </div>
               )}
             </CardContent>
