@@ -13,6 +13,7 @@ export interface IStorage {
   getAnalysisById(id: number): Promise<Analysis | undefined>;
   getRecentAnalyses(limit: number): Promise<Analysis[]>;
   searchAnalyses(query: string): Promise<Analysis[]>;
+  deleteAnalysis(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -70,6 +71,20 @@ export class DatabaseStorage implements IStorage {
           like(analyses.courseCode || '', lowerQuery)
         )
       );
+  }
+  
+  async deleteAnalysis(id: number): Promise<boolean> {
+    try {
+      const result = await db
+        .delete(analyses)
+        .where(eq(analyses.id, id))
+        .returning({ id: analyses.id });
+      
+      return result.length > 0;
+    } catch (error) {
+      console.error("Error deleting analysis:", error);
+      return false;
+    }
   }
 }
 

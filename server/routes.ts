@@ -39,7 +39,7 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // API route to upload and analyze a syllabus
+  // API route to upload and analyze a single syllabus
   app.post("/api/analyze", upload.single("file"), async (req, res) => {
     try {
       if (!req.file) {
@@ -161,6 +161,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(200).json(analyses);
     } catch (error: any) {
       res.status(500).json({ message: error.message || "Failed to search analyses" });
+    }
+  });
+  
+  // API route to upload and analyze multiple syllabi
+  app.post("/api/analyze-multiple", upload.array("files", 10), async (req, res) => {
+    try {
+      const files = req.files as Express.Multer.File[];
+      if (!files || files.length === 0) {
+        return res.status(400).json({ message: "No files uploaded" });
+      }
+      
+      const results = [];
+      const errors = [];
+      
+      // Common course information for all files
+      const commonCourseName = req.body.courseName || "";
+      const commonCourseCode = req.body.courseCode || "";
+      
+      // Process each file
+      for (const file of files) {
+        try {
+          // Extract text from the uploaded document
+          const text = await extractTextFromDocument(file.path, path.extname(file.originalname).toLowerCase());
+          
+          // Use OpenAI to analyze the extracted text against Gen Ed requirements
+          // If the OpenAI analysis fails, fall back to the basic keyword analysis
+          let analysisResult;
+          let analysisMethod = "keyword";
+          
+          try {
+            console.log(`Analyzing syllabus ${file.originalname} with OpenAI...`);
+            analysisResult = await analyzeWithOpenAI(text, genEdRequirements);
+            analysisMethod = "ai";
+            console.log(`OpenAI analysis complete for ${file.originalname}`);
+          } catch (aiError) {
+            console.error(`OpenAI analysis failed for ${file.originalname}, falling back to basic analysis:`, aiError);
+            analysisResult = await analyzeGenEdRequirements(text);
+          }
+          
+          // Determine course name and code for this file
+          let courseName = commonCourseName;
+          let courseCode = commonCourseCode;
+          
+          // If common course info is not provided, use file-specific info from the form or AI extraction
+          if (!courseName) {
+            const fileSpecificName = req.body[`courseName_${file.originalname}`];
+            courseName = fileSpecificName || analysisResult.courseName || "Unnamed Course";
+          }
+          
+          if (!courseCode) {
+            const fileSpecificCode = req.body[`courseCode_${file.originalname}`];
+            courseCode = fileSpecificCode || analysisResult.courseCode || "";
+          }
+          
+          // Format the data for storage
+          const analysisData = {
+            courseName,
+            courseCode,
+            fileName: file.originalname,
+            fileSize: file.size,
+            fileType: path.extname(file.originalname).toLowerCase(),
+            approvedRequirements: analysisResult.approvedRequirements,
+            rejectedRequirements: analysisResult.rejectedRequirements
+          };
+          
+          // Validate the data before storing
+          const parsedData = insertAnalysisSchema.parse(analysisData);
+          
+          // Store the analysis in the database
+          const savedAnalysis = await storage.createAnalysis(parsedData);
+          
+          // Add to results
+          results.push({
+            id: savedAnalysis.id,
+            courseName,
+            courseCode,
+            approvedRequirements: analysisResult.approvedRequirements,
+            rejectedRequirements: analysisResult.rejectedRequirements,
+            fileName: file.originalname,
+            fileSize: file.size,
+            fileType: path.extname(file.originalname).toLowerCase(),
+            uploadDate: savedAnalysis.uploadDate,
+            analysisMethod
+          });
+          
+          // Clean up the uploaded file
+          fs.unlinkSync(file.path);
+          
+        } catch (fileError: any) {
+          // Add to errors but continue processing other files
+          errors.push({
+            fileName: file.originalname,
+            error: fileError.message || "Error analyzing file"
+          });
+          
+          // Clean up the file even if analysis failed
+          if (fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path);
+          }
+        }
+      }
+      
+      // Return the combined results
+      res.status(200).json({
+        success: results,
+        errors: errors
+      });
+      
+    } catch (error: any) {
+      console.error("Error analyzing multiple syllabi:", error);
+      res.status(500).json({ message: error.message || "An error occurred during analysis" });
+    }
+  });
+  
+  // API route to delete an analysis from the database
+  app.delete("/api/analyses/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+      
+      const deleted = await storage.deleteAnalysis(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Analysis not found or could not be deleted" });
+      }
+      
+      res.status(200).json({ message: "Analysis deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting analysis:", error);
+      res.status(500).json({ message: error.message || "Failed to delete analysis" });
     }
   });
 

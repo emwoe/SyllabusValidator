@@ -92,3 +92,47 @@ export async function searchAnalyses(query: string) {
   
   return await response.json();
 }
+
+/**
+ * Upload and analyze multiple documents
+ * @param formData FormData containing the files and optional metadata
+ * @param signal AbortSignal for cancellation
+ * @returns Promise<{success: AnalysisResult[], errors: {fileName: string, error: string}[]}>
+ */
+export async function analyzeMultipleDocuments(formData: FormData, signal?: AbortSignal): Promise<{
+  success: AnalysisResult[],
+  errors: {fileName: string, error: string}[]
+}> {
+  const response = await fetch('/api/analyze-multiple', {
+    method: 'POST',
+    body: formData,
+    signal,
+    credentials: 'include'
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || response.statusText || 'Failed to analyze documents');
+  }
+  
+  return await response.json();
+}
+
+/**
+ * Delete an analysis from the database
+ * @param id Analysis ID to delete
+ * @returns Promise<{message: string}>
+ */
+export async function deleteAnalysis(id: number): Promise<{message: string}> {
+  const response = await fetch(`/api/analyses/${id}`, {
+    method: 'DELETE',
+    credentials: 'include'
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || response.statusText || 'Failed to delete analysis');
+  }
+  
+  return await response.json();
+}
