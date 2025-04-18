@@ -150,6 +150,11 @@ A requirement is MET if:
 - At least 60% of its required elements are present in the syllabus
 - At least 60% of its Student Learning Outcomes (SLOs) are addressed
 
+SPECIAL CRITERIA FOR "CREATIVITY AND MAKING" REQUIREMENT:
+- For the "Creativity and Making" requirement, it can ONLY be approved if more than half (>50%) of the course content is dedicated to creative writing, theater, design, or visual arts. 
+- Look for evidence in the course schedule, assignments, and learning activities that the majority of the class time and coursework focuses on these creative disciplines.
+- If the syllabus doesn't clearly demonstrate that more than half of the class is dedicated to these creative activities, mark "Creativity and Making" as NOT MET regardless of other criteria.
+
 Respond only in JSON format with this structure:
 {
   "results": [

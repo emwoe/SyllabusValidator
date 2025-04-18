@@ -275,6 +275,36 @@ export async function analyzeGenEdRequirements(syllabusText: string): Promise<Pa
     const meetsMinimumRequirements = matchingReqs.length >= Math.ceil(requirement.requiredElements.length * 0.6) && 
                                      matchingSLOs.length >= Math.ceil(requirement.slos.length * 0.6);
     
+    // Special criteria for Creativity and Making
+    if (requirement.name === "Creativity and Making") {
+      // Check if the syllabus clearly shows >50% creative content
+      const creativeContentIndicators = [
+        "creative writing", "theater", "design", "visual art", "studio", "workshop", "portfolio",
+        "exhibition", "performance", "artistic", "sculpture", "painting", "drawing", "film",
+        "photography", "dance", "music composition", "creative project"
+      ];
+      
+      // Count occurrences of creative content indicators
+      let creativeContentScore = 0;
+      for (const indicator of creativeContentIndicators) {
+        const regex = new RegExp(indicator, 'gi');
+        const matches = normalizedText.match(regex);
+        if (matches) {
+          creativeContentScore += matches.length;
+        }
+      }
+      
+      // Only approve if there's substantial evidence of creative content
+      if (creativeContentScore < 10) {
+        rejectedRequirements.push({
+          name: requirement.name,
+          missingRequirements: ["More than half of course content must be dedicated to creative activities"],
+          missingSLOs: missingSLOs
+        });
+        continue; // Skip to next requirement
+      }
+    }
+    
     if (meetsMinimumRequirements) {
       approvedRequirements.push({
         name: requirement.name,
