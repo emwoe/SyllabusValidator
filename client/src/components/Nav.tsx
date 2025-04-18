@@ -12,16 +12,19 @@ export default function Nav() {
   return (
     <header className="bg-white shadow-sm sticky top-0 z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
+        {/* Title above navigation */}
+        <div className="text-center py-4 border-b border-neutral-100">
+          <Link href="/">
+            <span className="text-primary text-2xl font-serif font-bold cursor-pointer">SEU Gen Ed Syllabus Checker</span>
+          </Link>
+        </div>
+
+        {/* Navigation below title */}
+        <div className="flex justify-between h-14">
+          <div className="flex flex-1 justify-center">
+            <nav className="hidden sm:flex sm:space-x-8">
               <Link href="/">
-                <span className="text-primary text-xl font-serif font-bold cursor-pointer">SEU Gen Ed Syllabus Checker</span>
-              </Link>
-            </div>
-            <nav className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <Link href="/">
-                <a className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                <a className={`inline-flex items-center px-3 pt-1 border-b-2 text-sm font-medium ${
                   location === '/' 
                     ? 'border-primary text-neutral-900' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-900 hover:border-neutral-300'
@@ -30,7 +33,7 @@ export default function Nav() {
                 </a>
               </Link>
               <Link href="/database">
-                <a className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                <a className={`inline-flex items-center px-3 pt-1 border-b-2 text-sm font-medium ${
                   location === '/database' 
                     ? 'border-primary text-neutral-900' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-900 hover:border-neutral-300'
@@ -39,7 +42,7 @@ export default function Nav() {
                 </a>
               </Link>
               <Link href="/help">
-                <a className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                <a className={`inline-flex items-center px-3 pt-1 border-b-2 text-sm font-medium ${
                   location === '/help' 
                     ? 'border-primary text-neutral-900' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-900 hover:border-neutral-300'
@@ -49,7 +52,7 @@ export default function Nav() {
               </Link>
             </nav>
           </div>
-          <div className="hidden sm:ml-6 sm:flex sm:items-center">
+          <div className="hidden sm:ml-6 sm:flex sm:items-center absolute right-6">
             <button className="bg-white p-1 rounded-full text-neutral-600 hover:text-neutral-900 focus:outline-none">
               <span className="material-icons">account_circle</span>
             </button>
