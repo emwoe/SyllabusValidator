@@ -106,22 +106,10 @@ export default function FileUploader({ onAnalysisComplete, onAnalysisStart }: Fi
       const formData = new FormData();
       formData.append('file', file);
       
-      // Use the user-provided course information if available
-      if (courseName.trim()) {
-        formData.append('courseName', courseName.trim());
-      }
-      
-      if (courseCode.trim()) {
-        formData.append('courseCode', courseCode.trim());
-      } else {
-        // Try to extract course code from filename if not provided by the user
-        const filenameParts = file.name.split(/[-_\s.]/).filter(part => part.length > 0);
-        const possibleCourseCode = filenameParts.find(part => /^[A-Z]{2,4}\d{3,4}[A-Z]?$/i.test(part));
-        
-        if (possibleCourseCode) {
-          formData.append('courseCode', possibleCourseCode.toUpperCase());
-        }
-      }
+      // Always send the course name and code as provided by the user
+      // For empty strings, this will ensure they override any AI-extracted values
+      formData.append('courseName', courseName.trim());
+      formData.append('courseCode', courseCode.trim());
       
       const result = await analyzeDocument(formData, abortControllerRef.current.signal);
       

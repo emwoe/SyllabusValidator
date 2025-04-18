@@ -66,9 +66,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         analysisResult = await analyzeGenEdRequirements(text);
       }
       
-      // Prefer user-provided course information over AI-extracted information
-      const courseName = req.body.courseName || analysisResult.courseName || "Unnamed Course";
-      const courseCode = req.body.courseCode || analysisResult.courseCode || "";
+      // Always prioritize user-provided course information
+      // If user input is available, use it even if it's empty
+      const hasUserCourseName = 'courseName' in req.body; 
+      const hasUserCourseCode = 'courseCode' in req.body;
+      
+      const courseName = hasUserCourseName ? req.body.courseName : (analysisResult.courseName || "Unnamed Course");
+      const courseCode = hasUserCourseCode ? req.body.courseCode : (analysisResult.courseCode || "");
 
       // Format the data for storage
       const analysisData = {
