@@ -24,7 +24,12 @@ export default function Nav() {
         {/* Title above navigation */}
         <div className="text-left py-4 border-b border-neutral-100">
           <Link href="/">
-            <span className="text-primary text-2xl font-serif font-bold cursor-pointer">SEU Gen Ed Syllabus Checker</span>
+            <span 
+              className="text-primary text-2xl font-bold cursor-pointer" 
+              style={{ fontFamily: selectedFont }}
+            >
+              SEU Gen Ed Syllabus Checker
+            </span>
           </Link>
         </div>
 
