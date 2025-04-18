@@ -13,7 +13,7 @@ export default function Nav() {
     <header className="bg-white shadow-sm sticky top-0 z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Title above navigation */}
-        <div className="text-center py-4 border-b border-neutral-100">
+        <div className="text-left py-4 border-b border-neutral-100">
           <Link href="/">
             <span className="text-primary text-2xl font-serif font-bold cursor-pointer">SEU Gen Ed Syllabus Checker</span>
           </Link>
@@ -21,7 +21,7 @@ export default function Nav() {
 
         {/* Navigation below title */}
         <div className="flex justify-between h-14">
-          <div className="flex flex-1 justify-center">
+          <div className="flex">
             <nav className="hidden sm:flex sm:space-x-8">
               <Link href="/">
                 <a className={`inline-flex items-center px-3 pt-1 border-b-2 text-sm font-medium ${
@@ -52,7 +52,7 @@ export default function Nav() {
               </Link>
             </nav>
           </div>
-          <div className="hidden sm:ml-6 sm:flex sm:items-center absolute right-6">
+          <div className="hidden sm:flex sm:items-center">
             <button className="bg-white p-1 rounded-full text-neutral-600 hover:text-neutral-900 focus:outline-none">
               <span className="material-icons">account_circle</span>
             </button>
