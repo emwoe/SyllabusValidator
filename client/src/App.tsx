@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import Home from "@/pages/home";
 import Database from "@/pages/database";
 import Help from "@/pages/help";
+import SyllabusView from "@/pages/syllabus-view";
 
 function Router() {
   return (
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/database" component={Database} />
       <Route path="/help" component={Help} />
+      <Route path="/syllabus/:id" component={SyllabusView} />
       <Route component={NotFound} />
     </Switch>
   );

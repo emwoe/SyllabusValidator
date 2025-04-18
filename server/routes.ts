@@ -283,6 +283,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: error.message || "Failed to delete analysis" });
     }
   });
+  
+  // API route to get the original syllabus content for a specific analysis
+  app.get("/api/analyses/:id/content", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
+      
+      const analysis = await storage.getAnalysisById(id);
+      if (!analysis) {
+        return res.status(404).json({ message: "Analysis not found" });
+      }
+      
+      // For now, return a placeholder syllabus content
+      // In a real implementation, we would store the original text or fetch it from storage
+      res.status(200).json({ 
+        content: `SYLLABUS CONTENT FOR: ${analysis.courseName} (${analysis.courseCode})\n\n` +
+          `This is currently a placeholder for the syllabus content. In a production environment, ` +
+          `the system would store the original syllabus text when it's uploaded, or retrieve it ` +
+          `from a database or file storage.\n\n` +
+          `File: ${analysis.fileName}\n` +
+          `Size: ${analysis.fileSize} bytes\n` +
+          `Type: ${analysis.fileType}\n` +
+          `Uploaded: ${new Date(analysis.uploadDate).toLocaleString()}\n\n` +
+          `APPROVED REQUIREMENTS:\n` +
+          analysis.approvedRequirements.map(req => 
+            `- ${req.name}\n  Matching elements: ${req.matchingRequirements.join(', ')}\n  Matching SLOs: ${req.matchingSLOs.join(', ')}`
+          ).join('\n\n') +
+          `\n\nREJECTED REQUIREMENTS:\n` +
+          analysis.rejectedRequirements.map(req => 
+            `- ${req.name}\n  Missing elements: ${req.missingRequirements.join(', ')}\n  Missing SLOs: ${req.missingSLOs.join(', ')}`
+          ).join('\n\n')
+      });
+    } catch (error: any) {
+      console.error("Error fetching syllabus content:", error);
+      res.status(500).json({ message: error.message || "Failed to fetch syllabus content" });
+    }
+  });
 
   const httpServer = createServer(app);
 
