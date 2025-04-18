@@ -282,9 +282,10 @@ export default function SyllabusView() {
               ) : (
                 <div className="text-center py-8 flex flex-col items-center justify-center bg-neutral-50 rounded-md border border-neutral-200 h-[300px]">
                   <FileText size={36} className="text-neutral-300 mb-3" />
-                  <p className="text-neutral-500">Original syllabus content not available</p>
-                  <p className="text-neutral-400 text-sm mt-1">
-                    The document may have been uploaded before content storage was implemented
+                  <p className="text-neutral-500 font-medium">Original syllabus content not available</p>
+                  <p className="text-neutral-400 text-sm mt-1 px-4">
+                    This analysis was created before the document content storage feature was implemented. 
+                    To see syllabus content, please upload a new document.
                   </p>
                   <Button variant="outline" className="mt-4" size="sm" asChild>
                     <Link href="/home">Upload New Syllabus</Link>
