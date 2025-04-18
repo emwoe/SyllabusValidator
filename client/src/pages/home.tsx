@@ -9,24 +9,35 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Home() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [multipleResults, setMultipleResults] = useState<AnalysisResult[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [activeResultIndex, setActiveResultIndex] = useState<number>(0);
 
   const handleAnalysisComplete = (result: AnalysisResult) => {
     setAnalysisResult(result);
+    setMultipleResults([]);
     setIsAnalyzing(false);
   };
 
   const handleMultipleAnalysisComplete = (results: AnalysisResult[]) => {
     if (results.length > 0) {
-      setAnalysisResult(results[0]);
+      setMultipleResults(results);
+      setAnalysisResult(null);
     }
     setIsAnalyzing(false);
+    setActiveResultIndex(0);
   };
 
   const handleAnalysisStart = () => {
     setIsAnalyzing(true);
     setAnalysisResult(null);
+    setMultipleResults([]);
   };
+
+  // Determine what to show in the results section
+  const showMultipleResults = !isAnalyzing && multipleResults.length > 0;
+  const showSingleResult = !isAnalyzing && analysisResult !== null;
+  const currentResult = showMultipleResults ? multipleResults[activeResultIndex] : analysisResult;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -69,9 +80,35 @@ export default function Home() {
             </TabsContent>
           </Tabs>
           
+          {/* Display selector tabs for multiple results */}
+          {showMultipleResults && multipleResults.length > 1 && (
+            <div className="mb-6">
+              <h3 className="text-sm font-medium text-neutral-700 mb-2">Analysis Results ({multipleResults.length} courses)</h3>
+              <Tabs 
+                value={activeResultIndex.toString()} 
+                onValueChange={(value) => setActiveResultIndex(parseInt(value))}
+                className="w-full"
+              >
+                <TabsList className="flex overflow-x-auto mb-1 max-w-full pb-1 border-b border-neutral-200" style={{ scrollbarWidth: 'none' }}>
+                  {multipleResults.map((result, index) => (
+                    <TabsTrigger 
+                      key={index}
+                      value={index.toString()}
+                      className="min-w-max whitespace-nowrap flex-shrink-0 data-[state=active]:border-primary data-[state=active]:border-b-2 rounded-none data-[state=active]:shadow-none px-4 py-2"
+                    >
+                      <span className="font-medium">{result.courseName || result.fileName}</span>
+                      {result.courseCode && <span className="ml-1.5 text-neutral-500">({result.courseCode})</span>}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </div>
+          )}
+          
           <AnalysisResults 
-            result={analysisResult}
+            result={currentResult}
             isAnalyzing={isAnalyzing}
+            isMultiple={showMultipleResults}
           />
         </div>
         

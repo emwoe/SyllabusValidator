@@ -10,7 +10,7 @@ interface AnalysisResultsProps {
   isAnalyzing: boolean;
 }
 
-export default function AnalysisResults({ result, isAnalyzing }: AnalysisResultsProps) {
+export default function AnalysisResults({ result, isAnalyzing, isMultiple = false }: AnalysisResultsProps & { isMultiple?: boolean }) {
   const [expandedApproved, setExpandedApproved] = useState<string[]>([]);
   const [expandedRejected, setExpandedRejected] = useState<string[]>([]);
   const { toast } = useToast();
@@ -119,6 +119,11 @@ export default function AnalysisResults({ result, isAnalyzing }: AnalysisResults
                     {result.courseCode ? `${result.courseCode}: ` : ''}{result.courseName}
                   </h3>
                   <p className="text-sm text-neutral-600 mt-1">
+                    {isMultiple && (
+                      <span className="inline-flex items-center mr-2 px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                        <span className="material-icons text-xs mr-1">view_carousel</span> Batch Analysis
+                      </span>
+                    )}
                     Uploaded on {formatDate(result.uploadDate)} · {result.fileType.toUpperCase().replace('.', '')} · {formatFileSize(result.fileSize)}
                     {result.analysisMethod && (
                       <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
