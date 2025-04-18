@@ -6,7 +6,8 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { extractTextFromDocument } from "./utils/documentParser";
-import { analyzeGenEdRequirements } from "./utils/genEdAnalyzer";
+import { analyzeGenEdRequirements, genEdRequirements } from "./utils/genEdAnalyzer";
+import { analyzeWithOpenAI } from "./utils/openaiAnalyzer";
 
 // Set up multer for file uploads
 const upload = multer({
@@ -52,8 +53,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Extract text from the uploaded document
       const text = await extractTextFromDocument(file.path, path.extname(file.originalname).toLowerCase());
       
-      // Analyze the extracted text against Gen Ed requirements
-      const analysisResult = await analyzeGenEdRequirements(text);
+      // Use OpenAI to analyze the extracted text against Gen Ed requirements
+      // If the OpenAI analysis fails, fall back to the basic keyword analysis
+      let analysisResult;
+      try {
+        console.log("Analyzing syllabus with OpenAI...");
+        analysisResult = await analyzeWithOpenAI(text, genEdRequirements);
+        console.log("OpenAI analysis complete");
+      } catch (aiError) {
+        console.error("OpenAI analysis failed, falling back to basic analysis:", aiError);
+        analysisResult = await analyzeGenEdRequirements(text);
+      }
 
       // Format the data for storage
       const analysisData = {

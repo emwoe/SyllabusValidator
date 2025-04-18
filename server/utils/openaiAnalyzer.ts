@@ -21,8 +21,15 @@ export async function analyzeWithOpenAI(
   genEdRequirements: GenEdRequirement[]
 ): Promise<Partial<AnalysisResult>> {
   try {
+    // Make sure OpenAI API key is available
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error("OpenAI API key is missing. Please set the OPENAI_API_KEY environment variable.");
+    }
+    
     // Extract course information
+    console.log("Extracting course information with OpenAI...");
     const courseInfo = await extractCourseInfoWithAI(syllabusText);
+    console.log(`Course identified as: ${courseInfo.name} (${courseInfo.code})`);
     
     // Process each requirement with OpenAI
     const approvedRequirements: ApprovedRequirement[] = [];
@@ -30,17 +37,31 @@ export async function analyzeWithOpenAI(
 
     // Process requirements in batches to prevent token limits
     const batchSize = 3;
+    const totalBatches = Math.ceil(genEdRequirements.length / batchSize);
+    
+    console.log(`Processing ${genEdRequirements.length} requirements in ${totalBatches} batches...`);
+    
     for (let i = 0; i < genEdRequirements.length; i += batchSize) {
+      const batchNumber = Math.floor(i / batchSize) + 1;
       const requirementsBatch = genEdRequirements.slice(i, i + batchSize);
       
-      console.log(`Processing batch ${i/batchSize + 1} of requirements (${requirementsBatch.map(r => r.name).join(', ')})`);
+      console.log(`Processing batch ${batchNumber}/${totalBatches}: ${requirementsBatch.map(r => r.name).join(', ')}`);
       
-      const batchResults = await processRequirementsBatch(syllabusText, requirementsBatch);
-      
-      approvedRequirements.push(...batchResults.approved);
-      rejectedRequirements.push(...batchResults.rejected);
+      try {
+        const batchResults = await processRequirementsBatch(syllabusText, requirementsBatch);
+        
+        approvedRequirements.push(...batchResults.approved);
+        rejectedRequirements.push(...batchResults.rejected);
+        
+        console.log(`Batch ${batchNumber} complete: ${batchResults.approved.length} approved, ${batchResults.rejected.length} rejected requirements`);
+      } catch (batchError) {
+        console.error(`Error processing batch ${batchNumber}:`, batchError);
+        // Continue with next batch instead of failing the entire process
+      }
     }
 
+    console.log(`OpenAI analysis summary: ${approvedRequirements.length} approved, ${rejectedRequirements.length} rejected requirements`);
+    
     return {
       courseName: courseInfo.name,
       courseCode: courseInfo.code,
@@ -80,7 +101,7 @@ async function extractCourseInfoWithAI(syllabusText: string): Promise<{ name: st
       response_format: { type: "json_object" },
     });
 
-    const result = JSON.parse(response.choices[0].message.content);
+    const result = JSON.parse(response.choices[0].message.content as string);
     
     return {
       name: result.courseName || "Unknown Course",
@@ -156,7 +177,7 @@ Respond only in JSON format with this structure:
     response_format: { type: "json_object" },
   });
 
-  const result = JSON.parse(response.choices[0].message.content);
+  const result = JSON.parse(response.choices[0].message.content as string);
   
   // Process the results
   const approved: ApprovedRequirement[] = [];
