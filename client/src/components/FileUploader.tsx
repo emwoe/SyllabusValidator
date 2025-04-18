@@ -14,6 +14,8 @@ export default function FileUploader({ onAnalysisComplete, onAnalysisStart }: Fi
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [fileData, setFileData] = useState<{name: string, size: number, type: string} | null>(null);
+  const [courseName, setCourseName] = useState("");
+  const [courseCode, setCourseCode] = useState("");
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -103,13 +105,22 @@ export default function FileUploader({ onAnalysisComplete, onAnalysisStart }: Fi
       
       const formData = new FormData();
       formData.append('file', file);
-
-      // Try to extract course information from filename
-      const filenameParts = file.name.split(/[-_\s.]/).filter(part => part.length > 0);
-      const possibleCourseCode = filenameParts.find(part => /^[A-Z]{2,4}\d{3,4}[A-Z]?$/i.test(part));
       
-      if (possibleCourseCode) {
-        formData.append('courseCode', possibleCourseCode.toUpperCase());
+      // Use the user-provided course information if available
+      if (courseName.trim()) {
+        formData.append('courseName', courseName.trim());
+      }
+      
+      if (courseCode.trim()) {
+        formData.append('courseCode', courseCode.trim());
+      } else {
+        // Try to extract course code from filename if not provided by the user
+        const filenameParts = file.name.split(/[-_\s.]/).filter(part => part.length > 0);
+        const possibleCourseCode = filenameParts.find(part => /^[A-Z]{2,4}\d{3,4}[A-Z]?$/i.test(part));
+        
+        if (possibleCourseCode) {
+          formData.append('courseCode', possibleCourseCode.toUpperCase());
+        }
       }
       
       const result = await analyzeDocument(formData, abortControllerRef.current.signal);
@@ -167,6 +178,35 @@ export default function FileUploader({ onAnalysisComplete, onAnalysisStart }: Fi
     <Card className="mb-8">
       <CardContent className="p-6">
         <h2 className="text-lg font-medium text-neutral-900 mb-4">Upload Syllabus</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label htmlFor="courseName" className="block text-sm font-medium text-neutral-700 mb-1">
+              Course Name
+            </label>
+            <input
+              type="text"
+              id="courseName"
+              value={courseName}
+              onChange={(e) => setCourseName(e.target.value)}
+              placeholder="Introduction to Psychology"
+              className="w-full px-3 py-2 border border-neutral-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+            />
+          </div>
+          <div>
+            <label htmlFor="courseCode" className="block text-sm font-medium text-neutral-700 mb-1">
+              Course Code
+            </label>
+            <input
+              type="text"
+              id="courseCode"
+              value={courseCode}
+              onChange={(e) => setCourseCode(e.target.value)}
+              placeholder="PSYC 101"
+              className="w-full px-3 py-2 border border-neutral-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+            />
+          </div>
+        </div>
         
         <div 
           className={`dropzone border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-neutral-50 transition-colors ${

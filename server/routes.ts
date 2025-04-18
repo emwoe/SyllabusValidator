@@ -47,9 +47,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const file = req.file;
-      const courseName = req.body.courseName || "Unnamed Course";
-      const courseCode = req.body.courseCode || "";
-
+      
       // Extract text from the uploaded document
       const text = await extractTextFromDocument(file.path, path.extname(file.originalname).toLowerCase());
       
@@ -67,6 +65,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("OpenAI analysis failed, falling back to basic analysis:", aiError);
         analysisResult = await analyzeGenEdRequirements(text);
       }
+      
+      // Prefer user-provided course information over AI-extracted information
+      const courseName = req.body.courseName || analysisResult.courseName || "Unnamed Course";
+      const courseCode = req.body.courseCode || analysisResult.courseCode || "";
 
       // Format the data for storage
       const analysisData = {
@@ -91,7 +93,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Return the analysis result
       res.status(200).json({
         id: savedAnalysis.id,
-        ...analysisResult,
+        courseName, 
+        courseCode,
+        approvedRequirements: analysisResult.approvedRequirements,
+        rejectedRequirements: analysisResult.rejectedRequirements,
         fileName: file.originalname,
         fileSize: file.size,
         fileType: path.extname(file.originalname).toLowerCase(),
