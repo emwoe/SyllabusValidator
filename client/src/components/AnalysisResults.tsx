@@ -31,12 +31,7 @@ export default function AnalysisResults({ result, isAnalyzing, isMultiple = fals
     }
   };
 
-  const handleSaveToDatabase = () => {
-    toast({
-      title: "Success",
-      description: "Analysis saved to database",
-    });
-  };
+  // All analyses are automatically saved to the database
 
   const handleExportPDF = () => {
     toast({
@@ -113,33 +108,39 @@ export default function AnalysisResults({ result, isAnalyzing, isMultiple = fals
           <div>
             {/* Course details */}
             <div className="bg-neutral-50 rounded-lg p-4 mb-6">
-              <div className="flex items-start">
-                <div className="flex-1">
-                  <h3 className="font-medium text-neutral-900">
-                    {result.courseCode ? `${result.courseCode}: ` : ''}{result.courseName}
-                  </h3>
-                  <p className="text-sm text-neutral-600 mt-1">
-                    {isMultiple && (
-                      <span className="inline-flex items-center mr-2 px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                        <span className="material-icons text-xs mr-1">view_carousel</span> Batch Analysis
-                      </span>
-                    )}
-                    Uploaded on {formatDate(result.uploadDate)} · {result.fileType.toUpperCase().replace('.', '')} · {formatFileSize(result.fileSize)}
-                    {result.analysisMethod && (
-                      <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                        {result.analysisMethod === 'ai' ? 'AI-Powered Analysis' : 'Keyword Analysis'}
-                      </span>
-                    )}
-                  </p>
-                </div>
-                <div>
-                  <button 
-                    className="text-primary hover:text-primary/80 text-sm font-medium flex items-center"
-                    onClick={handleSaveToDatabase}
-                  >
-                    <span className="material-icons text-sm mr-1">save</span> Save to Database
-                  </button>
-                </div>
+              <div>
+                <h3 className="font-medium text-neutral-900">
+                  {result.courseCode ? `${result.courseCode}: ` : ''}{result.courseName}
+                </h3>
+                <p className="text-sm text-neutral-600 mt-1 flex flex-wrap items-center gap-2">
+                  {isMultiple && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                      <span className="material-icons text-xs mr-1">view_carousel</span> Batch Analysis
+                    </span>
+                  )}
+                  <span className="inline-flex items-center">
+                    <span className="material-icons text-neutral-400 text-xs mr-1">event</span>
+                    {formatDate(result.uploadDate)}
+                  </span>
+                  <span className="inline-flex items-center">
+                    <span className="material-icons text-neutral-400 text-xs mr-1">description</span>
+                    {result.fileType.toUpperCase().replace('.', '')}
+                  </span>
+                  <span className="inline-flex items-center">
+                    <span className="material-icons text-neutral-400 text-xs mr-1">folder</span>
+                    {formatFileSize(result.fileSize)}
+                  </span>
+                  {result.analysisMethod && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                      <span className="material-icons text-xs mr-1">smart_toy</span>
+                      {result.analysisMethod === 'ai' ? 'AI-Powered Analysis' : 'Keyword Analysis'}
+                    </span>
+                  )}
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800">
+                    <span className="material-icons text-xs mr-1">save</span>
+                    Saved to Database
+                  </span>
+                </p>
               </div>
             </div>
             

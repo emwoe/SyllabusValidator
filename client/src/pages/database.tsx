@@ -105,7 +105,7 @@ export default function Database() {
             </div>
           ) : filteredAnalyses.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-neutral-200">
+              <table className="min-w-full divide-y divide-neutral-200 border-collapse">
                 <thead className="bg-neutral-50">
                   <tr>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
@@ -129,8 +129,12 @@ export default function Database() {
                   {filteredAnalyses.map((analysis: Analysis) => (
                     <tr key={analysis.id} className="hover:bg-neutral-50">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-neutral-900">
-                          {analysis.courseCode && `${analysis.courseCode}: `}{analysis.courseName}
+                        <div className="text-sm">
+                          {analysis.courseCode && (
+                            <span className="font-medium text-primary">{analysis.courseCode}</span>
+                          )}
+                          {analysis.courseCode && ": "}
+                          <span className="font-medium text-neutral-900">{analysis.courseName}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -140,14 +144,62 @@ export default function Database() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-wrap gap-1">
-                          {Array.isArray(analysis.approvedRequirements) && analysis.approvedRequirements.map((req: any) => (
-                            <span 
-                              key={`${analysis.id}-${req.name}`}
-                              className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-secondary/10 text-secondary"
-                            >
-                              {req.name}
-                            </span>
-                          ))}
+                          {Array.isArray(analysis.approvedRequirements) && analysis.approvedRequirements.map((req: any) => {
+                            // Assign different colors to different requirements for better differentiation
+                            let bgColorClass = '';
+                            let textColorClass = '';
+                            
+                            switch(req.name) {
+                              case "Quantitative Reasoning":
+                                bgColorClass = "bg-blue-100";
+                                textColorClass = "text-blue-800";
+                                break;
+                              case "Modern Language":
+                                bgColorClass = "bg-emerald-100";
+                                textColorClass = "text-emerald-800";
+                                break;
+                              case "Exploring Artistic Works":
+                                bgColorClass = "bg-purple-100";
+                                textColorClass = "text-purple-800";
+                                break;
+                              case "Diverse American Perspectives":
+                                bgColorClass = "bg-amber-100";
+                                textColorClass = "text-amber-800";
+                                break;
+                              case "Global Perspectives":
+                                bgColorClass = "bg-indigo-100";
+                                textColorClass = "text-indigo-800";
+                                break;
+                              case "Scientific Inquiry":
+                                bgColorClass = "bg-green-100";
+                                textColorClass = "text-green-800";
+                                break;
+                              case "Creativity and Making":
+                                bgColorClass = "bg-rose-100";
+                                textColorClass = "text-rose-800";
+                                break;
+                              case "Ethical Reasoning":
+                                bgColorClass = "bg-cyan-100";
+                                textColorClass = "text-cyan-800";
+                                break;
+                              case "Historical Perspectives":
+                                bgColorClass = "bg-orange-100";
+                                textColorClass = "text-orange-800";
+                                break;
+                              default:
+                                bgColorClass = "bg-secondary/10";
+                                textColorClass = "text-secondary";
+                            }
+                            
+                            return (
+                              <span 
+                                key={`${analysis.id}-${req.name}`}
+                                className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${bgColorClass} ${textColorClass}`}
+                              >
+                                {req.name}
+                              </span>
+                            );
+                          })}
                           {(!analysis.approvedRequirements || !Array.isArray(analysis.approvedRequirements) || analysis.approvedRequirements.length === 0) && (
                             <span className="text-sm text-neutral-500">None</span>
                           )}
