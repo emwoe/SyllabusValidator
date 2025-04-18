@@ -120,6 +120,11 @@ export default function AnalysisResults({ result, isAnalyzing }: AnalysisResults
                   </h3>
                   <p className="text-sm text-neutral-600 mt-1">
                     Uploaded on {formatDate(result.uploadDate)} · {result.fileType.toUpperCase().replace('.', '')} · {formatFileSize(result.fileSize)}
+                    {result.analysisMethod && (
+                      <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                        {result.analysisMethod === 'ai' ? 'AI-Powered Analysis' : 'Keyword Analysis'}
+                      </span>
+                    )}
                   </p>
                 </div>
                 <div>

@@ -78,4 +78,5 @@ export interface AnalysisResult {
   uploadDate: Date;
   approvedRequirements: ApprovedRequirement[];
   rejectedRequirements: RejectedRequirement[];
+  analysisMethod?: "ai" | "keyword";  // 'ai' for OpenAI, 'keyword' for basic matching
 }

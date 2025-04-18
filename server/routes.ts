@@ -56,9 +56,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use OpenAI to analyze the extracted text against Gen Ed requirements
       // If the OpenAI analysis fails, fall back to the basic keyword analysis
       let analysisResult;
+      let analysisMethod = "keyword";
+      
       try {
         console.log("Analyzing syllabus with OpenAI...");
         analysisResult = await analyzeWithOpenAI(text, genEdRequirements);
+        analysisMethod = "ai";
         console.log("OpenAI analysis complete");
       } catch (aiError) {
         console.error("OpenAI analysis failed, falling back to basic analysis:", aiError);
@@ -92,7 +95,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         fileName: file.originalname,
         fileSize: file.size,
         fileType: path.extname(file.originalname).toLowerCase(),
-        uploadDate: savedAnalysis.uploadDate
+        uploadDate: savedAnalysis.uploadDate,
+        analysisMethod: analysisMethod
       });
     } catch (error: any) {
       console.error("Error analyzing syllabus:", error);

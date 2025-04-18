@@ -231,6 +231,11 @@ export default function FileUploader({ onAnalysisComplete, onAnalysisStart }: Fi
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
+                {uploadProgress > 50 && (
+                  <p className="text-xs text-neutral-500 mt-1">
+                    Using AI to analyze syllabus content against Gen Ed requirements...
+                  </p>
+                )}
               </div>
               <button 
                 className="ml-4 text-neutral-400 hover:text-error"
