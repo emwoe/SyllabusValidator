@@ -3,9 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Analysis } from "@shared/schema";
 import { formatDate } from "@/lib/utils";
 import { Link } from "wouter";
+import { getRequirementColors } from "@/lib/requirementColors";
 
 export default function RecentAnalyses() {
-  const { data: recentAnalyses, isLoading } = useQuery({
+  const { data: recentAnalyses, isLoading } = useQuery<Analysis[]>({
     queryKey: ['/api/analyses/recent/3'],
     staleTime: 60000 // 1 minute
   });
@@ -31,14 +32,17 @@ export default function RecentAnalyses() {
                   Analyzed on {formatDate(new Date(analysis.uploadDate))}
                 </p>
                 <div className="mt-1 flex flex-wrap gap-1">
-                  {Array.isArray(analysis.approvedRequirements) && analysis.approvedRequirements.map((req: any) => (
-                    <span 
-                      key={`${analysis.id}-${req.name}`}
-                      className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-secondary/10 text-secondary"
-                    >
-                      {req.name}
-                    </span>
-                  ))}
+                  {Array.isArray(analysis.approvedRequirements) && analysis.approvedRequirements.map((req: any) => {
+                    const { bgColorClass, textColorClass } = getRequirementColors(req.name);
+                    return (
+                      <span 
+                        key={`${analysis.id}-${req.name}`}
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${bgColorClass} ${textColorClass}`}
+                      >
+                        {req.name}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             ))}

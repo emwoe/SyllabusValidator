@@ -43,7 +43,7 @@ export default function Home() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <h1 className="text-2xl font-serif font-bold text-neutral-900">General Education Requirements Analysis</h1>
-        <p className="mt-2 text-neutral-600">Upload a course syllabus to analyze whether it meets General Education requirements.</p>
+        <p className="mt-2 text-neutral-600">Upload a course syllabus and see which Gen Ed requirements OpenAI believes it may fulfill. This is a work in progress!</p>
         <div className="mt-4 bg-blue-50 border border-blue-100 rounded-lg p-4">
           <h3 className="text-sm font-medium text-blue-800 flex items-center">
             <span className="material-icons text-blue-600 mr-1 text-sm">info</span>
@@ -51,7 +51,7 @@ export default function Home() {
           </h3>
           <p className="mt-1 text-sm text-blue-700">
             Our system uses AI-powered analysis to intelligently match syllabus content with General Education requirements.
-            The AI evaluates context and meaning rather than just exact keyword matches, providing more accurate results.
+            This app has been provided with SEU rules for course approvals. It sends user-uploaded syllabus files to the OpenAI API for analysis.
             If AI analysis is unavailable, we'll fall back to a basic keyword matching system.
           </p>
         </div>

@@ -8,6 +8,7 @@ import { formatDate } from "@/lib/utils";
 import { Eye } from "lucide-react";
 import { Link } from "wouter";
 import DeleteAnalysisButton from "@/components/DeleteAnalysisButton";
+import { getRequirementColors } from "@/lib/requirementColors";
 
 export default function Database() {
   const [searchQuery, setSearchQuery] = useState("");
