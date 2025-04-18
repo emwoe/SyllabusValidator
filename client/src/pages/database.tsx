@@ -2,17 +2,24 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Analysis } from "@shared/schema";
 import { formatDate } from "@/lib/utils";
+import DeleteAnalysisButton from "@/components/DeleteAnalysisButton";
 
 export default function Database() {
   const [searchQuery, setSearchQuery] = useState("");
+  const queryClient = useQueryClient();
   
-  const { data: analyses, isLoading } = useQuery({
+  const { data: analyses, isLoading } = useQuery<Analysis[]>({
     queryKey: ['/api/analyses'],
     staleTime: 60000 // 1 minute
   });
+  
+  const handleDeleteSuccess = () => {
+    // Invalidate and refetch the analyses data
+    queryClient.invalidateQueries({ queryKey: ['/api/analyses'] });
+  };
   
   const filteredAnalyses = analyses 
     ? analyses.filter((analysis: Analysis) => {
@@ -113,6 +120,9 @@ export default function Database() {
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
                       File Type
                     </th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-neutral-200">
@@ -147,6 +157,13 @@ export default function Database() {
                         <div className="text-sm text-neutral-500">
                           {analysis.fileType.toUpperCase().replace('.', '')}
                         </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <DeleteAnalysisButton
+                          id={analysis.id}
+                          courseName={analysis.courseName}
+                          onDelete={handleDeleteSuccess}
+                        />
                       </td>
                     </tr>
                   ))}

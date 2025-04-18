@@ -154,7 +154,7 @@ export default function MultiFileUploader({ onAnalysisComplete, onAnalysisStart 
           toast({
             title: "Analysis partially complete",
             description: `Analyzed ${results.success.length} syllabi with ${results.errors.length} errors.`,
-            variant: "warning"
+            variant: "destructive"
           });
         } else if (results.success.length === 0 && results.errors.length > 0) {
           toast({

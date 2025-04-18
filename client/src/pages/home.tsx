@@ -1,9 +1,11 @@
 import FileUploader from "@/components/FileUploader";
+import MultiFileUploader from "@/components/MultiFileUploader";
 import AnalysisResults from "@/components/AnalysisResults";
 import RequirementsGuide from "@/components/RequirementsGuide";
 import RecentAnalyses from "@/components/RecentAnalyses";
 import { useState } from "react";
 import { AnalysisResult } from "@shared/schema";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Home() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
@@ -11,6 +13,13 @@ export default function Home() {
 
   const handleAnalysisComplete = (result: AnalysisResult) => {
     setAnalysisResult(result);
+    setIsAnalyzing(false);
+  };
+
+  const handleMultipleAnalysisComplete = (results: AnalysisResult[]) => {
+    if (results.length > 0) {
+      setAnalysisResult(results[0]);
+    }
     setIsAnalyzing(false);
   };
 
@@ -39,10 +48,26 @@ export default function Home() {
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <FileUploader 
-            onAnalysisStart={handleAnalysisStart}
-            onAnalysisComplete={handleAnalysisComplete} 
-          />
+          <Tabs defaultValue="single" className="mb-6">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="single">Single Syllabus</TabsTrigger>
+              <TabsTrigger value="multi">Multiple Syllabi</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="single">
+              <FileUploader 
+                onAnalysisStart={handleAnalysisStart}
+                onAnalysisComplete={handleAnalysisComplete} 
+              />
+            </TabsContent>
+            
+            <TabsContent value="multi">
+              <MultiFileUploader 
+                onAnalysisStart={handleAnalysisStart}
+                onAnalysisComplete={handleMultipleAnalysisComplete} 
+              />
+            </TabsContent>
+          </Tabs>
           
           <AnalysisResults 
             result={analysisResult}
