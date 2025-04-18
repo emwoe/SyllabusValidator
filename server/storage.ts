@@ -1,7 +1,6 @@
 import { analyses, users, type User, type InsertUser, type Analysis, type InsertAnalysis } from "@shared/schema";
-
-// modify the interface with any CRUD methods
-// you might need
+import { db } from "./db";
+import { eq, desc, or, like } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -16,66 +15,62 @@ export interface IStorage {
   searchAnalyses(query: string): Promise<Analysis[]>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private analyses: Map<number, Analysis>;
-  private userCurrentId: number;
-  private analysisCurrentId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.analyses = new Map();
-    this.userCurrentId = 1;
-    this.analysisCurrentId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.userCurrentId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
     return user;
   }
 
   async createAnalysis(insertAnalysis: InsertAnalysis): Promise<Analysis> {
-    const id = this.analysisCurrentId++;
-    const uploadDate = new Date();
-    const analysis: Analysis = { ...insertAnalysis, id, uploadDate };
-    this.analyses.set(id, analysis);
+    const [analysis] = await db
+      .insert(analyses)
+      .values(insertAnalysis)
+      .returning();
     return analysis;
   }
 
   async getAnalyses(): Promise<Analysis[]> {
-    return Array.from(this.analyses.values());
+    return await db.select().from(analyses);
   }
 
   async getAnalysisById(id: number): Promise<Analysis | undefined> {
-    return this.analyses.get(id);
+    const [analysis] = await db.select().from(analyses).where(eq(analyses.id, id));
+    return analysis;
   }
 
   async getRecentAnalyses(limit: number): Promise<Analysis[]> {
-    return Array.from(this.analyses.values())
-      .sort((a, b) => b.uploadDate.getTime() - a.uploadDate.getTime())
-      .slice(0, limit);
+    return await db
+      .select()
+      .from(analyses)
+      .orderBy(desc(analyses.uploadDate))
+      .limit(limit);
   }
 
   async searchAnalyses(query: string): Promise<Analysis[]> {
-    const lowerQuery = query.toLowerCase();
-    return Array.from(this.analyses.values()).filter(
-      (analysis) => 
-        analysis.courseName.toLowerCase().includes(lowerQuery) ||
-        (analysis.courseCode && analysis.courseCode.toLowerCase().includes(lowerQuery))
-    );
+    const lowerQuery = `%${query.toLowerCase()}%`;
+    return await db
+      .select()
+      .from(analyses)
+      .where(
+        or(
+          like(analyses.courseName, lowerQuery),
+          like(analyses.courseCode || '', lowerQuery)
+        )
+      );
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
