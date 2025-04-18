@@ -1,18 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 
 export default function Nav() {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [selectedFont, setSelectedFont] = useState<string>('Roboto Slab, serif');
-  
-  useEffect(() => {
-    // Check if a font preference is stored in localStorage
-    const storedFont = localStorage.getItem('preferredHeaderFont');
-    if (storedFont) {
-      setSelectedFont(storedFont);
-    }
-  }, []);
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -24,12 +15,7 @@ export default function Nav() {
         {/* Title above navigation */}
         <div className="text-left py-4 border-b border-neutral-100">
           <Link href="/">
-            <span 
-              className="text-primary text-2xl font-bold cursor-pointer" 
-              style={{ fontFamily: selectedFont }}
-            >
-              SEU Gen Ed Syllabus Checker
-            </span>
+            <span className="text-primary text-2xl font-serif font-bold cursor-pointer">SEU Gen Ed Syllabus Checker</span>
           </Link>
         </div>
 
@@ -62,15 +48,6 @@ export default function Nav() {
                     : 'border-transparent text-neutral-600 hover:text-neutral-900 hover:border-neutral-300'
                 }`}>
                   Help
-                </a>
-              </Link>
-              <Link href="/font-picker">
-                <a className={`inline-flex items-center px-3 pt-1 border-b-2 text-sm font-medium ${
-                  location === '/font-picker' 
-                    ? 'border-primary text-neutral-900' 
-                    : 'border-transparent text-neutral-600 hover:text-neutral-900 hover:border-neutral-300'
-                }`}>
-                  Font Settings
                 </a>
               </Link>
             </nav>
@@ -121,15 +98,6 @@ export default function Nav() {
                 : 'border-transparent text-neutral-600 hover:bg-neutral-50 hover:border-neutral-300 hover:text-neutral-900'
             }`}>
               Help
-            </a>
-          </Link>
-          <Link href="/font-picker">
-            <a className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
-              location === '/font-picker' 
-                ? 'bg-neutral-50 border-primary text-primary' 
-                : 'border-transparent text-neutral-600 hover:bg-neutral-50 hover:border-neutral-300 hover:text-neutral-900'
-            }`}>
-              Font Settings
             </a>
           </Link>
         </div>
