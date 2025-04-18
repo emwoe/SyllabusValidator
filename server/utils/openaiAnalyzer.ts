@@ -150,10 +150,26 @@ A requirement is MET if:
 - At least 60% of its required elements are present in the syllabus
 - At least 60% of its Student Learning Outcomes (SLOs) are addressed
 
-SPECIAL CRITERIA FOR "CREATIVITY AND MAKING" REQUIREMENT:
+SPECIAL CRITERIA FOR SPECIFIC REQUIREMENTS:
+
+1. ETHICS REQUIREMENT:
+- Courses should ONLY be approved for Ethics/Ethical Reasoning if they are primarily philosophy courses taught in a philosophy department.
+- Look for explicit mentions that the course is housed in a philosophy department or has a PHIL course code.
+- The syllabus must clearly indicate that the course focuses on philosophical ethics, not just ethical considerations within another discipline.
+- If the syllabus doesn't explicitly state that it's a philosophy course in a philosophy department, mark "Ethics" as NOT MET regardless of other criteria.
+
+2. MODERN LANGUAGE REQUIREMENT:
+- Courses should ONLY be approved for Modern Language if they explicitly state that students will learn to communicate in a non-English language.
+- The syllabus must clearly indicate that active language learning (speaking, writing, reading) in a non-English language is a primary focus of the course.
+- Look for evidence of assignments, exercises, or assessments conducted in the non-English language.
+- If the syllabus doesn't explicitly show that students will actively learn to communicate in a non-English language, mark "Modern Language" as NOT MET regardless of other criteria.
+
+3. CREATIVITY AND MAKING REQUIREMENT:
 - For the "Creativity and Making" requirement, it can ONLY be approved if more than half (>50%) of the course content is dedicated to creative writing, theater, design, or visual arts. 
 - Look for evidence in the course schedule, assignments, and learning activities that the majority of the class time and coursework focuses on these creative disciplines.
 - If the syllabus doesn't clearly demonstrate that more than half of the class is dedicated to these creative activities, mark "Creativity and Making" as NOT MET regardless of other criteria.
+
+Be strict in applying these special criteria. Do not mark a requirement as MET unless it fully satisfies its specific criteria.
 
 Respond only in JSON format with this structure:
 {
@@ -196,9 +212,37 @@ Respond only in JSON format with this structure:
         matchingSLOs: item.matchingSLOs || [],
       });
     } else {
+      // Add specific reason explanations for certain requirements when they're not met
+      let extendedMissingRequirements = [...(item.missingElements || [])];
+      
+      // Add special detailed explanations for the strict requirement failures
+      if (item.requirement === "Ethics" || item.requirement === "Ethical Reasoning") {
+        if (!extendedMissingRequirements.some(r => r.includes("philosophy department"))) {
+          extendedMissingRequirements.push(
+            "Course must be primarily a philosophy course taught in a philosophy department"
+          );
+        }
+      }
+      
+      if (item.requirement === "Modern Language") {
+        if (!extendedMissingRequirements.some(r => r.includes("non-English language"))) {
+          extendedMissingRequirements.push(
+            "Course must explicitly focus on teaching students to communicate in a non-English language"
+          );
+        }
+      }
+      
+      if (item.requirement === "Creativity and Making") {
+        if (!extendedMissingRequirements.some(r => r.includes("more than half"))) {
+          extendedMissingRequirements.push(
+            "More than 50% of the course must be dedicated to creative writing, theater, design, or visual arts"
+          );
+        }
+      }
+      
       rejected.push({
         name: item.requirement,
-        missingRequirements: item.missingElements || [],
+        missingRequirements: extendedMissingRequirements,
         missingSLOs: item.missingSLOs || [],
       });
     }
