@@ -7,7 +7,8 @@ interface RequirementInfo {
   slos: string[];
 }
 
-const requirements: RequirementInfo[] = [
+// A subset of requirements shown initially
+const initialRequirements: RequirementInfo[] = [
   {
     name: "Freshmen Seminar",
     description: "Students will join a community of learners and actively engage in academic and co-curricular exploration.",
@@ -36,7 +37,12 @@ const requirements: RequirementInfo[] = [
       "Present meaningful information, concepts and viewpoints.",
       "Compare social practices from their own culture relative to those from another culture."
     ]
-  },
+  }
+];
+
+// Full list of all requirements
+const allRequirements: RequirementInfo[] = [
+  ...initialRequirements,
   {
     name: "Oral Communication",
     description: "Students develop professional speech structure and delivery techniques for effective presentations.",
@@ -68,6 +74,76 @@ const requirements: RequirementInfo[] = [
       "Understand and respond to substantive issues in their writing that show global improvement through substantial and successive revision.",
       "Analyze and produce appropriate texts for a non-academic audience to demonstrate genre awareness through rhetorical conventions."
     ]
+  },
+  {
+    name: "Exploring Artistic Works",
+    description: "Students analyze, interpret, and appreciate creative works through critical engagement with artistic forms.",
+    slos: [
+      "Identify and interpret elements of artistic expression in various media.",
+      "Apply theoretical frameworks to evaluate creative works.",
+      "Articulate how creative works reflect diverse cultural and historical contexts.",
+      "Demonstrate understanding of the creative process through analysis or participation."
+    ]
+  },
+  {
+    name: "Diverse American Perspectives",
+    description: "Students engage with diverse cultural, social, and historical experiences of American communities.",
+    slos: [
+      "Analyze how diverse identities, experiences, and structures shape American society.",
+      "Identify the historical foundations and contemporary manifestations of inequality in the United States.",
+      "Recognize and critically examine one's own perspectives in relation to diverse American communities.",
+      "Apply interdisciplinary approaches to understanding complex social issues in American contexts."
+    ]
+  },
+  {
+    name: "Global Perspectives",
+    description: "Students examine diverse global worldviews, systems, and interactions to develop cross-cultural understanding.",
+    slos: [
+      "Compare and contrast perspectives, practices, and experiences across different cultural contexts.",
+      "Analyze global issues from multiple cultural, historical, and geopolitical viewpoints.",
+      "Evaluate how global systems and processes affect people across different societies.",
+      "Demonstrate awareness of how one's own cultural position shapes understanding of global contexts."
+    ]
+  },
+  {
+    name: "Scientific Inquiry",
+    description: "Students apply scientific methods to investigate natural phenomena and evaluate empirical evidence.",
+    slos: [
+      "Demonstrate understanding of scientific theories, concepts, and models.",
+      "Design and conduct investigations using appropriate scientific methods.",
+      "Analyze and interpret scientific data using quantitative and qualitative approaches.",
+      "Evaluate scientific information and claims based on methodological validity and reliability."
+    ]
+  },
+  {
+    name: "Creativity and Making",
+    description: "Students engage in creative processes to produce original work and develop creative problem-solving skills.",
+    slos: [
+      "Generate original ideas or works through creative experimentation and iteration.",
+      "Apply appropriate techniques, tools, or methods in the creative process.",
+      "Critically evaluate creative work using discipline-specific criteria.",
+      "Articulate how creativity contributes to knowledge generation and problem-solving."
+    ]
+  },
+  {
+    name: "Ethical Reasoning",
+    description: "Students examine ethical frameworks, principles, and dilemmas to develop thoughtful moral reasoning.",
+    slos: [
+      "Identify and analyze ethical issues in various contexts.",
+      "Apply ethical theories and frameworks to evaluate complex moral problems.",
+      "Construct and defend ethical arguments with reasoned justification.",
+      "Evaluate the implications of decisions and actions on diverse stakeholders."
+    ]
+  },
+  {
+    name: "Historical Perspectives",
+    description: "Students analyze historical contexts and processes to understand how past events shape contemporary issues.",
+    slos: [
+      "Identify and explain significant historical developments, events, and patterns.",
+      "Analyze primary and secondary historical sources using appropriate methodologies.",
+      "Evaluate how historical narratives are constructed and contested.",
+      "Apply historical perspectives to interpret contemporary issues and challenges."
+    ]
   }
 ];
 
@@ -86,22 +162,18 @@ export default function RequirementsGuide() {
   const toggleShowAll = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault(); // Prevent default anchor behavior
     setShowAll(prev => !prev);
-    
-    // If showing all, expand all requirements, otherwise collapse all
-    if (!showAll) {
-      setExpandedRequirements(requirements.map(req => req.name));
-    } else {
-      setExpandedRequirements([]);
-    }
   };
   
+  // Use the appropriate requirements list based on showAll state
+  const displayRequirements = showAll ? allRequirements : initialRequirements;
+
   return (
     <Card className="mb-6">
       <CardContent className="p-6">
         <h2 className="text-lg font-medium text-neutral-900 mb-4">Gen Ed Requirements</h2>
         
         <div className="space-y-4">
-          {requirements.map((req) => (
+          {displayRequirements.map((req: RequirementInfo) => (
             <div 
               key={req.name}
               className="border border-neutral-100 rounded-lg overflow-hidden shadow-sm"
@@ -124,7 +196,7 @@ export default function RequirementsGuide() {
                   <p className="text-sm">{req.description}</p>
                   <h4 className="text-sm font-medium mt-2">Student Learning Outcomes:</h4>
                   <ol className="list-decimal ml-5 space-y-1">
-                    {req.slos.map((slo, index) => (
+                    {req.slos.map((slo: string, index: number) => (
                       <li key={`${req.name}-slo-${index}`}>{slo}</li>
                     ))}
                   </ol>
@@ -139,7 +211,7 @@ export default function RequirementsGuide() {
               className="text-primary text-sm font-medium hover:text-primary/80"
               onClick={toggleShowAll}
             >
-              {showAll ? "Collapse all requirements" : "View all requirements →"}
+              {showAll ? "Show fewer requirements ←" : "View all requirements →"}
             </a>
           </div>
         </div>
