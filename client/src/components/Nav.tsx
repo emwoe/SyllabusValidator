@@ -16,7 +16,7 @@ export default function Nav() {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link href="/">
-                <span className="text-primary text-xl font-serif font-bold cursor-pointer">SyllabusCheck</span>
+                <span className="text-primary text-xl font-serif font-bold cursor-pointer">SEU Gen Ed Syllabus Checker</span>
               </Link>
             </div>
             <nav className="hidden sm:ml-6 sm:flex sm:space-x-8">
