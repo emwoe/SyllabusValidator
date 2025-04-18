@@ -10,6 +10,7 @@ import Home from "@/pages/home";
 import Database from "@/pages/database";
 import Help from "@/pages/help";
 import SyllabusView from "@/pages/syllabus-view";
+import FontPicker from "@/pages/font-picker";
 
 function Router() {
   return (
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/database" component={Database} />
       <Route path="/help" component={Help} />
       <Route path="/syllabus/:id" component={SyllabusView} />
+      <Route path="/font-picker" component={FontPicker} />
       <Route component={NotFound} />
     </Switch>
   );
