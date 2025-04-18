@@ -148,7 +148,7 @@ export default function Database() {
                               {req.name}
                             </span>
                           ))}
-                          {(!analysis.approvedRequirements || analysis.approvedRequirements.length === 0) && (
+                          {(!analysis.approvedRequirements || !Array.isArray(analysis.approvedRequirements) || analysis.approvedRequirements.length === 0) && (
                             <span className="text-sm text-neutral-500">None</span>
                           )}
                         </div>

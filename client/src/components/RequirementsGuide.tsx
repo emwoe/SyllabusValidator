@@ -73,6 +73,7 @@ const requirements: RequirementInfo[] = [
 
 export default function RequirementsGuide() {
   const [expandedRequirements, setExpandedRequirements] = useState<string[]>([]);
+  const [showAll, setShowAll] = useState(false);
   
   const toggleRequirement = (name: string) => {
     setExpandedRequirements(prev => 
@@ -80,6 +81,18 @@ export default function RequirementsGuide() {
         ? prev.filter(r => r !== name)
         : [...prev, name]
     );
+  };
+  
+  const toggleShowAll = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault(); // Prevent default anchor behavior
+    setShowAll(prev => !prev);
+    
+    // If showing all, expand all requirements, otherwise collapse all
+    if (!showAll) {
+      setExpandedRequirements(requirements.map(req => req.name));
+    } else {
+      setExpandedRequirements([]);
+    }
   };
   
   return (
@@ -121,8 +134,12 @@ export default function RequirementsGuide() {
           ))}
           
           <div className="text-center mt-2">
-            <a href="#" className="text-primary text-sm font-medium hover:text-primary/80">
-              View all requirements →
+            <a 
+              href="#" 
+              className="text-primary text-sm font-medium hover:text-primary/80"
+              onClick={toggleShowAll}
+            >
+              {showAll ? "Collapse all requirements" : "View all requirements →"}
             </a>
           </div>
         </div>
