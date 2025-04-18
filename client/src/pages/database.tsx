@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Analysis } from "@shared/schema";
 import { formatDate } from "@/lib/utils";
+import { Eye } from "lucide-react";
+import { Link } from "wouter";
 import DeleteAnalysisButton from "@/components/DeleteAnalysisButton";
 
 export default function Database() {
@@ -259,11 +261,23 @@ export default function Database() {
                         </div>
                       </td>
                       <td className="px-6 py-5 whitespace-nowrap text-right">
-                        <DeleteAnalysisButton
-                          id={analysis.id}
-                          courseName={analysis.courseName}
-                          onDelete={handleDeleteSuccess}
-                        />
+                        <div className="flex items-center justify-end gap-2">
+                          <Link href={`/syllabus/${analysis.id}`}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                              title="View Syllabus with Commentary"
+                            >
+                              <Eye size={16} />
+                            </Button>
+                          </Link>
+                          <DeleteAnalysisButton
+                            id={analysis.id}
+                            courseName={analysis.courseName}
+                            onDelete={handleDeleteSuccess}
+                          />
+                        </div>
                       </td>
                     </tr>
                   ))}

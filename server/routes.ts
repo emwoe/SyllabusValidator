@@ -299,6 +299,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // For now, return a placeholder syllabus content
       // In a real implementation, we would store the original text or fetch it from storage
+      const approvedReqs = Array.isArray(analysis.approvedRequirements) 
+        ? analysis.approvedRequirements.map((req: any) => 
+            `- ${req.name}\n  Matching elements: ${req.matchingRequirements?.join(', ') || 'None'}\n  Matching SLOs: ${req.matchingSLOs?.join(', ') || 'None'}`
+          ).join('\n\n')
+        : 'None';
+
+      const rejectedReqs = Array.isArray(analysis.rejectedRequirements)
+        ? analysis.rejectedRequirements.map((req: any) => 
+            `- ${req.name}\n  Missing elements: ${req.missingRequirements?.join(', ') || 'None'}\n  Missing SLOs: ${req.missingSLOs?.join(', ') || 'None'}`
+          ).join('\n\n')
+        : 'None';
+
       res.status(200).json({ 
         content: `SYLLABUS CONTENT FOR: ${analysis.courseName} (${analysis.courseCode})\n\n` +
           `This is currently a placeholder for the syllabus content. In a production environment, ` +
@@ -308,14 +320,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           `Size: ${analysis.fileSize} bytes\n` +
           `Type: ${analysis.fileType}\n` +
           `Uploaded: ${new Date(analysis.uploadDate).toLocaleString()}\n\n` +
-          `APPROVED REQUIREMENTS:\n` +
-          analysis.approvedRequirements.map(req => 
-            `- ${req.name}\n  Matching elements: ${req.matchingRequirements.join(', ')}\n  Matching SLOs: ${req.matchingSLOs.join(', ')}`
-          ).join('\n\n') +
-          `\n\nREJECTED REQUIREMENTS:\n` +
-          analysis.rejectedRequirements.map(req => 
-            `- ${req.name}\n  Missing elements: ${req.missingRequirements.join(', ')}\n  Missing SLOs: ${req.missingSLOs.join(', ')}`
-          ).join('\n\n')
+          `APPROVED REQUIREMENTS:\n${approvedReqs}\n\n` +
+          `REJECTED REQUIREMENTS:\n${rejectedReqs}`
       });
     } catch (error: any) {
       console.error("Error fetching syllabus content:", error);
