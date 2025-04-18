@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Check, XCircle, FileText, User, Clock } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { getRequirementColors } from "@/lib/requirementColors";
 
 export default function SyllabusView() {
   const [match, params] = useRoute<{ id: string }>("/syllabus/:id");
@@ -159,26 +160,32 @@ export default function SyllabusView() {
                   <p className="text-sm text-neutral-500 italic">No requirements approved</p>
                 ) : (
                   <ul className="space-y-2">
-                    {analysis.approvedRequirements.map((req: ApprovedRequirement) => (
-                      <li key={req.name} className="bg-green-50 border border-green-100 rounded-md p-3">
-                        <div className="font-medium text-green-700">{req.name}</div>
-                        <div className="text-sm text-green-600 mt-1">
-                          <span className="font-medium">Matching criteria:</span>
-                          <ul className="list-disc list-inside mt-1 pl-1">
-                            {req.matchingRequirements.map((match: string, idx: number) => (
-                              <li key={idx} className="text-xs text-green-600 ml-2">{match}</li>
+                    {analysis.approvedRequirements.map((req: ApprovedRequirement) => {
+                      const { bgColorClass, textColorClass } = getRequirementColors(req.name);
+                      // Create lighter/darker variants for the border and background
+                      const bgLighterClass = bgColorClass.replace('100', '50');
+                      const borderClass = bgColorClass.replace('bg', 'border');
+                      return (
+                        <li key={req.name} className={`${bgLighterClass} border ${borderClass} rounded-md p-3`}>
+                          <div className={`font-medium ${textColorClass}`}>{req.name}</div>
+                          <div className={`text-sm ${textColorClass} mt-1`}>
+                            <span className="font-medium">Matching criteria:</span>
+                            <ul className="list-disc list-inside mt-1 pl-1">
+                              {req.matchingRequirements.map((match: string, idx: number) => (
+                                <li key={idx} className={`text-xs ${textColorClass} ml-2`}>{match}</li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {req.matchingSLOs.map((slo: number) => (
+                              <Badge key={slo} variant="outline" className={`${bgColorClass} ${textColorClass} border-${borderClass}`}>
+                                SLO {slo}
+                              </Badge>
                             ))}
-                          </ul>
-                        </div>
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {req.matchingSLOs.map((slo: number) => (
-                            <Badge key={slo} variant="outline" className="bg-green-100 text-green-800 border-green-200">
-                              SLO {slo}
-                            </Badge>
-                          ))}
-                        </div>
-                      </li>
-                    ))}
+                          </div>
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </div>
