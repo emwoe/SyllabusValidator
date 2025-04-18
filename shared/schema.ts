@@ -27,6 +27,7 @@ export const analyses = pgTable("analyses", {
   uploadDate: timestamp("upload_date").defaultNow().notNull(),
   approvedRequirements: jsonb("approved_requirements").notNull(),
   rejectedRequirements: jsonb("rejected_requirements").notNull(),
+  content: text("content"),  // Store the extracted document text
 });
 
 // Define the insert schema for analyses

@@ -212,7 +212,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             fileSize: file.size,
             fileType: path.extname(file.originalname).toLowerCase(),
             approvedRequirements: analysisResult.approvedRequirements,
-            rejectedRequirements: analysisResult.rejectedRequirements
+            rejectedRequirements: analysisResult.rejectedRequirements,
+            content: text // Store the original document text
           };
           
           // Validate the data before storing
@@ -297,32 +298,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Analysis not found" });
       }
       
-      // For now, return a placeholder syllabus content
-      // In a real implementation, we would store the original text or fetch it from storage
-      const approvedReqs = Array.isArray(analysis.approvedRequirements) 
-        ? analysis.approvedRequirements.map((req: any) => 
-            `- ${req.name}\n  Matching elements: ${req.matchingRequirements?.join(', ') || 'None'}\n  Matching SLOs: ${req.matchingSLOs?.join(', ') || 'None'}`
-          ).join('\n\n')
-        : 'None';
+      // Check if we have the actual content stored
+      if (analysis.content) {
+        // Return the actual syllabus content
+        res.status(200).json({ 
+          content: analysis.content,
+          fileType: analysis.fileType
+        });
+      } else {
+        // Fallback for legacy analyses without stored content
+        const approvedReqs = Array.isArray(analysis.approvedRequirements) 
+          ? analysis.approvedRequirements.map((req: any) => 
+              `- ${req.name}\n  Matching elements: ${req.matchingRequirements?.join(', ') || 'None'}\n  Matching SLOs: ${req.matchingSLOs?.join(', ') || 'None'}`
+            ).join('\n\n')
+          : 'None';
 
-      const rejectedReqs = Array.isArray(analysis.rejectedRequirements)
-        ? analysis.rejectedRequirements.map((req: any) => 
-            `- ${req.name}\n  Missing elements: ${req.missingRequirements?.join(', ') || 'None'}\n  Missing SLOs: ${req.missingSLOs?.join(', ') || 'None'}`
-          ).join('\n\n')
-        : 'None';
+        const rejectedReqs = Array.isArray(analysis.rejectedRequirements)
+          ? analysis.rejectedRequirements.map((req: any) => 
+              `- ${req.name}\n  Missing elements: ${req.missingRequirements?.join(', ') || 'None'}\n  Missing SLOs: ${req.missingSLOs?.join(', ') || 'None'}`
+            ).join('\n\n')
+          : 'None';
 
-      res.status(200).json({ 
-        content: `SYLLABUS CONTENT FOR: ${analysis.courseName} (${analysis.courseCode})\n\n` +
-          `This is currently a placeholder for the syllabus content. In a production environment, ` +
-          `the system would store the original syllabus text when it's uploaded, or retrieve it ` +
-          `from a database or file storage.\n\n` +
-          `File: ${analysis.fileName}\n` +
-          `Size: ${analysis.fileSize} bytes\n` +
-          `Type: ${analysis.fileType}\n` +
-          `Uploaded: ${new Date(analysis.uploadDate).toLocaleString()}\n\n` +
-          `APPROVED REQUIREMENTS:\n${approvedReqs}\n\n` +
-          `REJECTED REQUIREMENTS:\n${rejectedReqs}`
-      });
+        res.status(200).json({ 
+          content: `SYLLABUS CONTENT FOR: ${analysis.courseName} (${analysis.courseCode})\n\n` +
+            `The original syllabus content is not available for this analysis.\n\n` +
+            `File: ${analysis.fileName}\n` +
+            `Size: ${analysis.fileSize} bytes\n` +
+            `Type: ${analysis.fileType}\n` +
+            `Uploaded: ${new Date(analysis.uploadDate).toLocaleString()}\n\n` +
+            `APPROVED REQUIREMENTS:\n${approvedReqs}\n\n` +
+            `REJECTED REQUIREMENTS:\n${rejectedReqs}`,
+          fileType: analysis.fileType
+        });
+      }
     } catch (error: any) {
       console.error("Error fetching syllabus content:", error);
       res.status(500).json({ message: error.message || "Failed to fetch syllabus content" });

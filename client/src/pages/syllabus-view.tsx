@@ -16,6 +16,7 @@ export default function SyllabusView() {
   const [match, params] = useRoute<{ id: string }>("/syllabus/:id");
   const id = match && params?.id ? parseInt(params.id) : undefined;
   const [syllabusText, setSyllabusText] = useState("");
+  const [fileType, setFileType] = useState("");
   const [isLoadingSyllabus, setIsLoadingSyllabus] = useState(false);
 
   const { data: analysis, isLoading } = useQuery({
@@ -35,6 +36,7 @@ export default function SyllabusView() {
         
         const data = await response.json();
         setSyllabusText(data.content);
+        setFileType(data.fileType || "");
       } catch (error) {
         console.error("Error loading syllabus content:", error);
       } finally {
@@ -243,12 +245,36 @@ export default function SyllabusView() {
                   <Skeleton className="h-4 w-5/6" />
                 </div>
               ) : syllabusText ? (
-                <div className="p-4 bg-neutral-50 rounded-md border border-neutral-200 whitespace-pre-wrap font-mono text-sm">
-                  {syllabusText}
+                <div className="document-viewer">
+                  <div className="flex items-center justify-between mb-3 pb-2 border-b">
+                    <div className="flex items-center">
+                      <FileText size={18} className="mr-2 text-neutral-600" />
+                      <span className="font-medium">{analysis.fileName}</span>
+                    </div>
+                    {fileType && (
+                      <Badge variant="outline" className="uppercase text-xs">
+                        {fileType.replace('.', '')}
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  <div className="p-6 bg-white rounded-md border shadow-sm max-h-[600px] overflow-y-auto">
+                    {/* Document content with styling based on file type */}
+                    <div className={`
+                      ${fileType?.includes('.pdf') ? 'font-sans' : 'font-mono'} 
+                      text-sm whitespace-pre-wrap leading-relaxed
+                    `}>
+                      {syllabusText}
+                    </div>
+                  </div>
                 </div>
               ) : (
-                <div className="text-center py-6 text-neutral-500">
-                  <p>Original syllabus content not available</p>
+                <div className="text-center py-8 flex flex-col items-center justify-center bg-neutral-50 rounded-md border border-neutral-200 h-[300px]">
+                  <FileText size={36} className="text-neutral-300 mb-3" />
+                  <p className="text-neutral-500">Original syllabus content not available</p>
+                  <p className="text-neutral-400 text-sm mt-1">
+                    The document may have been uploaded before content storage was implemented
+                  </p>
                 </div>
               )}
             </CardContent>
