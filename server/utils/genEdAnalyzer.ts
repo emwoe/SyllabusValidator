@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 
 // Define the Gen Ed requirements structure based on the PDF
-interface GenEdRequirement {
+export interface GenEdRequirement {
   name: string;
   description: string;
   slos: string[];
@@ -12,7 +12,7 @@ interface GenEdRequirement {
 }
 
 // Load the Gen Ed requirements data
-const genEdRequirements: GenEdRequirement[] = [
+export const genEdRequirements: GenEdRequirement[] = [
   {
     name: "Freshmen Seminar",
     description: "Students will join a community of learners and actively engage in academic and co-curricular exploration.",
