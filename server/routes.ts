@@ -175,10 +175,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results = [];
       const errors = [];
       
-      // Common course information for all files
-      const commonCourseName = req.body.courseName || "";
-      const commonCourseCode = req.body.courseCode || "";
-      
       // Process each file
       for (const file of files) {
         try {
@@ -200,20 +196,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             analysisResult = await analyzeGenEdRequirements(text);
           }
           
-          // Determine course name and code for this file
-          let courseName = commonCourseName;
-          let courseCode = commonCourseCode;
+          // Get file-specific course info if provided
+          const fileSpecificName = req.body[`courseName_${file.originalname}`] || "";
+          const fileSpecificCode = req.body[`courseCode_${file.originalname}`] || "";
           
-          // If common course info is not provided, use file-specific info from the form or AI extraction
-          if (!courseName) {
-            const fileSpecificName = req.body[`courseName_${file.originalname}`];
-            courseName = fileSpecificName || analysisResult.courseName || "Unnamed Course";
-          }
-          
-          if (!courseCode) {
-            const fileSpecificCode = req.body[`courseCode_${file.originalname}`];
-            courseCode = fileSpecificCode || analysisResult.courseCode || "";
-          }
+          // Use file-specific course info if provided, otherwise use AI extraction results
+          let courseName = fileSpecificName || analysisResult.courseName || "Unnamed Course";
+          let courseCode = fileSpecificCode || analysisResult.courseCode || "";
           
           // Format the data for storage
           const analysisData = {

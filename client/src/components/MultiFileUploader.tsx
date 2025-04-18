@@ -16,8 +16,7 @@ export default function MultiFileUploader({ onAnalysisComplete, onAnalysisStart 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [commonCourseName, setCommonCourseName] = useState("");
-  const [commonCourseCode, setCommonCourseCode] = useState("");
+  const [courseInfoMap, setCourseInfoMap] = useState<Record<string, { name: string; code: string }>>({});
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -85,7 +84,17 @@ export default function MultiFileUploader({ onAnalysisComplete, onAnalysisStart 
   };
   
   const removeFile = (index: number) => {
+    const fileToRemove = selectedFiles[index];
     setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    
+    // Also remove the course info for this file if it exists
+    if (fileToRemove && courseInfoMap[fileToRemove.name]) {
+      setCourseInfoMap(prev => {
+        const updated = { ...prev };
+        delete updated[fileToRemove.name];
+        return updated;
+      });
+    }
   };
   
   const uploadAndAnalyzeFiles = async () => {
@@ -116,18 +125,21 @@ export default function MultiFileUploader({ onAnalysisComplete, onAnalysisStart 
       
       const formData = new FormData();
       
-      // Add common course info if provided
-      if (commonCourseName.trim()) {
-        formData.append('courseName', commonCourseName.trim());
-      }
-      
-      if (commonCourseCode.trim()) {
-        formData.append('courseCode', commonCourseCode.trim());
-      }
-      
-      // Add all files to formData
+      // Add all files to formData with their individual course info
       selectedFiles.forEach(file => {
+        // Add the file
         formData.append('files', file);
+        
+        // Add course info for this file if provided
+        const courseInfo = courseInfoMap[file.name];
+        if (courseInfo) {
+          if (courseInfo.name) {
+            formData.append(`courseName_${file.name}`, courseInfo.name);
+          }
+          if (courseInfo.code) {
+            formData.append(`courseCode_${file.name}`, courseInfo.code);
+          }
+        }
       });
       
       const results = await analyzeMultipleDocuments(formData, abortControllerRef.current.signal);
@@ -139,6 +151,7 @@ export default function MultiFileUploader({ onAnalysisComplete, onAnalysisStart 
       setTimeout(() => {
         setIsUploading(false);
         setSelectedFiles([]);
+        setCourseInfoMap({});
         
         if (results.success.length > 0) {
           onAnalysisComplete(results.success);
@@ -205,34 +218,9 @@ export default function MultiFileUploader({ onAnalysisComplete, onAnalysisStart 
       <CardContent className="p-6">
         <h2 className="text-lg font-medium text-neutral-900 mb-4">Analyze Multiple Syllabi</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label htmlFor="commonCourseName" className="block text-sm font-medium text-neutral-700 mb-1">
-              Common Course Name (optional)
-            </label>
-            <input
-              type="text"
-              id="commonCourseName"
-              value={commonCourseName}
-              onChange={(e) => setCommonCourseName(e.target.value)}
-              placeholder="Apply to all files"
-              className="w-full px-3 py-2 border border-neutral-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-            />
-          </div>
-          <div>
-            <label htmlFor="commonCourseCode" className="block text-sm font-medium text-neutral-700 mb-1">
-              Common Course Code (optional)
-            </label>
-            <input
-              type="text"
-              id="commonCourseCode"
-              value={commonCourseCode}
-              onChange={(e) => setCommonCourseCode(e.target.value)}
-              placeholder="Apply to all files"
-              className="w-full px-3 py-2 border border-neutral-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-            />
-          </div>
-        </div>
+        <p className="mb-4 text-neutral-600">
+          Upload and analyze multiple syllabus files at once. Each file can be for a different course.
+        </p>
         
         <div 
           className={`dropzone border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-neutral-50 transition-colors ${
@@ -264,17 +252,56 @@ export default function MultiFileUploader({ onAnalysisComplete, onAnalysisStart 
               {selectedFiles.map((file, index) => (
                 <div 
                   key={`${file.name}-${index}`}
-                  className="flex items-center justify-between p-2 bg-neutral-50 rounded border border-neutral-200"
+                  className="p-3 bg-neutral-50 rounded border border-neutral-200 space-y-2"
                 >
-                  <span className="text-sm truncate max-w-xs">{file.name}</span>
-                  <div className="flex items-center">
-                    <span className="text-xs text-neutral-500 mr-2">{formatFileSize(file.size)}</span>
-                    <button 
-                      onClick={() => removeFile(index)}
-                      className="text-neutral-400 hover:text-error"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium truncate max-w-xs">{file.name}</span>
+                    <div className="flex items-center">
+                      <span className="text-xs text-neutral-500 mr-2">{formatFileSize(file.size)}</span>
+                      <button 
+                        onClick={() => removeFile(index)}
+                        className="text-neutral-400 hover:text-error"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="Course Name"
+                        className="w-full px-2 py-1 text-sm border border-neutral-300 rounded-md"
+                        value={courseInfoMap[file.name]?.name || ''}
+                        onChange={(e) => {
+                          setCourseInfoMap(prev => ({
+                            ...prev,
+                            [file.name]: {
+                              ...prev[file.name],
+                              name: e.target.value
+                            }
+                          }));
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="Course Code"
+                        className="w-full px-2 py-1 text-sm border border-neutral-300 rounded-md"
+                        value={courseInfoMap[file.name]?.code || ''}
+                        onChange={(e) => {
+                          setCourseInfoMap(prev => ({
+                            ...prev,
+                            [file.name]: {
+                              ...prev[file.name],
+                              code: e.target.value
+                            }
+                          }));
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               ))}
