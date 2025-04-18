@@ -36,14 +36,23 @@ export async function extractTextFromDocument(filePath: string, fileType: string
  */
 async function extractTextFromPDF(filePath: string): Promise<string> {
   try {
+    console.log(`Extracting text from PDF: ${filePath}`);
     const pdfData = await pdfExtract.extract(filePath, {});
     
-    // Combine text from all pages
-    const text = pdfData.pages
-      .map(page => page.content.map(item => item.str).join(' '))
-      .join('\n\n');
+    console.log(`PDF has ${pdfData.pages.length} pages`);
+    
+    // Combine text from all pages with better handling
+    let fullText = '';
+    for (let i = 0; i < pdfData.pages.length; i++) {
+      const page = pdfData.pages[i];
+      const pageText = page.content.map(item => item.str).join(' ');
+      fullText += pageText + '\n\n';
       
-    return text;
+      console.log(`Extracted ${pageText.length} characters from page ${i+1}`);
+    }
+      
+    console.log(`Total extracted text length: ${fullText.length} characters`);
+    return fullText;
   } catch (error) {
     console.error("Error extracting text from PDF:", error);
     
