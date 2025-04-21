@@ -6,8 +6,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Set up the worker for PDF.js with caching to improve performance
-// Use a local worker source to avoid network issues
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+// Use unpkg CDN which is more reliable in some environments
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 interface PDFViewerProps {
   url: string;
@@ -22,7 +22,7 @@ export default function PDFViewer({ url, title }: PDFViewerProps) {
   const [error, setError] = useState<string | null>(null);
   const [loadStartTime, setLoadStartTime] = useState<number | null>(null);
   const [loadTimeout, setLoadTimeout] = useState(false);
-  const [viewMode, setViewMode] = useState<'pdf.js' | 'iframe'>('pdf.js');
+  const [viewMode, setViewMode] = useState<'pdf.js' | 'iframe'>('iframe');
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [loadAttempts, setLoadAttempts] = useState(0);
 
@@ -215,9 +215,9 @@ export default function PDFViewer({ url, title }: PDFViewerProps) {
                     </div>
                   }
                   options={{
-                    cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/cmaps/',
+                    cMapUrl: 'https://unpkg.com/pdfjs-dist@3.4.120/cmaps/',
                     cMapPacked: true,
-                    standardFontDataUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/standard_fonts/'
+                    standardFontDataUrl: 'https://unpkg.com/pdfjs-dist@3.4.120/standard_fonts/'
                   }}
                 >
                   <Page 
