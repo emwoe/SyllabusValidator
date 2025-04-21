@@ -188,20 +188,25 @@ export default function Database() {
                       <td className="px-6 py-5">
                         <div className="flex flex-col gap-1.5">
                           {/* Primary Best Fit */}
-                          {analysis.bestFit ? (
-                            <Badge 
-                              variant="outline" 
-                              className="bg-blue-50 text-blue-700 border-blue-100 flex items-center gap-1.5 w-fit"
-                            >
-                              <Award size={12} className="text-blue-500" />
-                              {(analysis.bestFit as RequirementFit).name}
-                              {(analysis.bestFit as RequirementFit).matchScore !== undefined && (
-                                <span className="text-blue-500 text-xs ml-1">
-                                  {(analysis.bestFit as RequirementFit).matchScore}%
-                                </span>
-                              )}
-                            </Badge>
-                          ) : (
+                          {analysis.bestFit ? (() => {
+                            // Use the shared utility function for consistent color coding
+                            const bestFit = analysis.bestFit as RequirementFit;
+                            const { bgColorClass, textColorClass } = getRequirementColors(bestFit.name);
+                            
+                            return (
+                              <span 
+                                className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${bgColorClass} ${textColorClass} w-fit`}
+                              >
+                                <Award size={12} className={`${textColorClass} mr-1`} />
+                                {bestFit.name}
+                                {bestFit.matchScore !== undefined && (
+                                  <span className={`${textColorClass} text-xs ml-1`}>
+                                    {bestFit.matchScore}%
+                                  </span>
+                                )}
+                              </span>
+                            );
+                          })() : (
                             <span className="text-sm text-neutral-500">None identified</span>
                           )}
                           
@@ -209,16 +214,20 @@ export default function Database() {
                           {analysis.potentialFits && Array.isArray(analysis.potentialFits) && 
                            analysis.potentialFits
                             .filter((fit: RequirementFit) => fit.matchScore >= 70 && fit.name !== (analysis.bestFit as RequirementFit)?.name)
-                            .map((fit: RequirementFit, idx: number) => (
-                              <Badge 
-                                key={`${analysis.id}-secondaryfit-${idx}`}
-                                variant="outline" 
-                                className="bg-blue-50/80 text-blue-700 border-blue-100 flex items-center gap-1.5 w-fit opacity-90"
-                              >
-                                {fit.name}
-                                <span className="text-blue-500 text-xs ml-1">{fit.matchScore}%</span>
-                              </Badge>
-                          ))}
+                            .map((fit: RequirementFit, idx: number) => {
+                              // Use the shared utility function for consistent color coding
+                              const { bgColorClass, textColorClass } = getRequirementColors(fit.name);
+                              
+                              return (
+                                <span 
+                                  key={`${analysis.id}-secondaryfit-${idx}`}
+                                  className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${bgColorClass} ${textColorClass} w-fit`}
+                                >
+                                  {fit.name}
+                                  <span className={`text-xs ml-1 ${textColorClass}`}>{fit.matchScore}%</span>
+                                </span>
+                              );
+                            })}
                         </div>
                       </td>
                       <td className="px-6 py-5">
