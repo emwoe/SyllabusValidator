@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Analysis } from "@shared/schema";
+import { Analysis, RequirementFit } from "@shared/schema";
 import { formatDate } from "@/lib/utils";
 import { Eye, Award } from "lucide-react";
 import { Link } from "wouter";
@@ -31,10 +31,14 @@ export default function Database() {
         const approvedRequirements = Array.isArray(analysis.approvedRequirements) 
           ? analysis.approvedRequirements.map((req: any) => req.name.toLowerCase()).join(' ')
           : '';
+        const bestFitName = analysis.bestFit 
+          ? (analysis.bestFit as RequirementFit).name.toLowerCase()
+          : '';
           
         return !searchQuery || 
           courseInfo.includes(searchQuery.toLowerCase()) ||
-          approvedRequirements.includes(searchQuery.toLowerCase());
+          approvedRequirements.includes(searchQuery.toLowerCase()) ||
+          bestFitName.includes(searchQuery.toLowerCase());
       })
     : [];
     
@@ -48,14 +52,22 @@ export default function Database() {
     
     // Generate CSV content
     let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Course Code,Course Name,Upload Date,File Type,Approved Requirements\n";
+    csvContent += "Course Code,Course Name,Upload Date,File Type,Approved Requirements,Best Fit,Match Score\n";
     
     analyses.forEach((analysis: Analysis) => {
       const approvedReqs = Array.isArray(analysis.approvedRequirements)
         ? analysis.approvedRequirements.map((req: any) => req.name).join('; ')
         : '';
+      
+      const bestFit = analysis.bestFit 
+        ? (analysis.bestFit as RequirementFit).name 
+        : '';
         
-      csvContent += `"${analysis.courseCode}","${analysis.courseName}","${formatDate(new Date(analysis.uploadDate))}","${analysis.fileType}","${approvedReqs}"\n`;
+      const matchScore = analysis.bestFit 
+        ? (analysis.bestFit as RequirementFit).matchScore + '%' 
+        : '';
+        
+      csvContent += `"${analysis.courseCode}","${analysis.courseName}","${formatDate(new Date(analysis.uploadDate))}","${analysis.fileType}","${approvedReqs}","${bestFit}","${matchScore}"\n`;
     });
     
     // Create download link
@@ -83,7 +95,7 @@ export default function Database() {
             <form onSubmit={handleSearch} className="flex-1 flex gap-2">
               <Input 
                 type="text" 
-                placeholder="Search by course name, code, or requirement..." 
+                placeholder="Search by course name, code, requirement, or best fit..." 
                 className="flex-1"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -183,10 +195,10 @@ export default function Database() {
                               className="bg-blue-50 text-blue-700 border-blue-100 flex items-center gap-1.5"
                             >
                               <Award size={12} className="text-blue-500" />
-                              {analysis.bestFit.name}
-                              {analysis.bestFit.matchScore && (
+                              {(analysis.bestFit as RequirementFit).name}
+                              {(analysis.bestFit as RequirementFit).matchScore && (
                                 <span className="text-blue-500 text-xs ml-1">
-                                  {analysis.bestFit.matchScore}%
+                                  {(analysis.bestFit as RequirementFit).matchScore}%
                                 </span>
                               )}
                             </Badge>

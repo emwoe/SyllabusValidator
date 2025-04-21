@@ -257,7 +257,7 @@ export default function SyllabusView() {
                           <div className="text-xs font-medium text-blue-700 mb-1">Matching SLOs:</div>
                           <div className="flex flex-wrap gap-1">
                             {analysis.bestFit.matchingSLOs?.length ? (
-                              analysis.bestFit.matchingSLOs.map((slo) => (
+                              analysis.bestFit.matchingSLOs.map((slo: number) => (
                                 <Badge key={slo} variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
                                   SLO {slo}
                                 </Badge>
@@ -272,7 +272,7 @@ export default function SyllabusView() {
                           <div className="text-xs font-medium text-blue-700 mb-1">Missing SLOs:</div>
                           <div className="flex flex-wrap gap-1">
                             {analysis.bestFit.missingSLOs?.length ? (
-                              analysis.bestFit.missingSLOs.map((slo) => (
+                              analysis.bestFit.missingSLOs.map((slo: number) => (
                                 <Badge key={slo} variant="outline" className="bg-gray-100 text-gray-800 border-gray-200">
                                   SLO {slo}
                                 </Badge>
@@ -311,7 +311,7 @@ export default function SyllabusView() {
                           </p>
                           
                           <div className="flex flex-wrap gap-1 mt-2">
-                            {fit.matchingSLOs?.map((slo) => (
+                            {fit.matchingSLOs?.map((slo: number) => (
                               <Badge key={slo} variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">
                                 SLO {slo}
                               </Badge>
