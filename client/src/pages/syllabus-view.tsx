@@ -407,14 +407,23 @@ export default function SyllabusView() {
                     </div>
                   </div>
                   
-                  {/* PDF Viewer for PDF files when documentPath is available */}
+                  {/* PDF View option for PDF files when documentPath is available */}
                   {documentPath && fileType.toLowerCase() === '.pdf' ? (
                     <div className="mb-4">
-                      <iframe 
-                        src={`/api/documents/${documentPath}`}
-                        className="w-full h-[500px] border border-gray-200 rounded"
-                        title="PDF Document"
-                      ></iframe>
+                      <div className="flex justify-center items-center p-8 bg-gray-50 border border-gray-200 rounded-md mb-4">
+                        <div className="text-center">
+                          <FileText size={48} className="mx-auto mb-4 text-gray-400" />
+                          <p className="text-gray-700 mb-3">PDF document is available for viewing</p>
+                          <Button 
+                            size="lg"
+                            className="gap-2" 
+                            onClick={() => window.open(`/api/documents/${documentPath}`, '_blank')}
+                          >
+                            <ExternalLink size={16} />
+                            Open PDF Viewer
+                          </Button>
+                        </div>
+                      </div>
                       <Separator className="my-4" />
                       <h3 className="text-base font-medium mb-3">Extracted Text:</h3>
                     </div>
