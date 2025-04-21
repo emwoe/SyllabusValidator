@@ -12,6 +12,48 @@ const openai = new OpenAI({
 const MODEL = config.openai.model;
 
 /**
+ * Extract Student Learning Outcomes (SLOs) from the syllabus text
+ * @param syllabusText The full text of the syllabus
+ * @returns Promise<string> The extracted SLOs text or a message indicating none were found
+ */
+async function extractSyllabusLearningOutcomes(syllabusText: string): Promise<string> {
+  try {
+    console.log("Extracting Student Learning Outcomes from syllabus...");
+    
+    const response = await openai.chat.completions.create({
+      model: MODEL,
+      messages: [
+        {
+          role: "system",
+          content: 
+            "You are an expert academic syllabus analyzer. Your task is to extract the Student Learning Outcomes (SLOs) " +
+            "from the syllabus. These are typically found in sections labeled 'Learning Outcomes', 'Student Learning Outcomes', " +
+            "'Course Objectives', 'Learning Objectives', or similar. Look for numbered or bulleted lists of skills or knowledge " +
+            "students should gain from the course. Only extract the actual SLOs, not surrounding text."
+        },
+        {
+          role: "user",
+          content: `Extract all Student Learning Outcomes from this syllabus. Return just the SLOs in a numbered list format:\n\n${syllabusText.substring(0, 15000)}`,
+        },
+      ],
+    });
+
+    const extractedSLOs = response.choices[0].message.content;
+    
+    if (!extractedSLOs || extractedSLOs.trim().length < 10) {
+      console.log("No clear SLOs found in syllabus");
+      return "No clear Student Learning Outcomes could be identified in the syllabus.";
+    }
+    
+    console.log("Successfully extracted Student Learning Outcomes");
+    return extractedSLOs;
+  } catch (error) {
+    console.error("Error extracting SLOs:", error);
+    return "Error extracting Student Learning Outcomes from syllabus.";
+  }
+}
+
+/**
  * Uses advanced AI to analyze syllabus text against Gen Ed requirements
  * @param syllabusText The extracted text from the syllabus
  * @param genEdRequirements Array of Gen Ed requirements to check against
@@ -64,8 +106,14 @@ export async function analyzeWithOpenAI(
     console.log(`OpenAI analysis summary: ${approvedRequirements.length} approved, ${rejectedRequirements.length} rejected requirements`);
     
     // Determine requirement fit categories
-    console.log("Determining best fit, potential fits, and poor fits...");
+    console.log("Analyzing Student Learning Outcomes to determine best fits...");
     const fitResults = await determineRequirementFits(syllabusText, approvedRequirements, rejectedRequirements, genEdRequirements);
+    
+    if (fitResults.bestFit) {
+      console.log(`Best fit identified: ${fitResults.bestFit.name} with match score ${fitResults.bestFit.matchScore}%`);
+    } else {
+      console.log("No clear best fit identified");
+    }
     
     return {
       courseName: courseInfo.name,
@@ -278,6 +326,10 @@ async function determineRequirementFits(
   poorFits: RequirementFit[]
 }> {
   try {
+    // First extract the SLOs from the syllabus
+    console.log("Extracting Student Learning Outcomes for fit analysis...");
+    const extractedSLOs = await extractSyllabusLearningOutcomes(syllabusText);
+    
     // Truncate syllabus to avoid token limits
     const truncatedSyllabus = syllabusText.substring(0, 10000);
     
@@ -299,6 +351,9 @@ You are an expert in analyzing academic syllabi against General Education requir
 SYLLABUS TEXT (excerpt):
 ${truncatedSyllabus}
 
+EXTRACTED STUDENT LEARNING OUTCOMES FROM SYLLABUS:
+${extractedSLOs}
+
 REQUIREMENTS:
 ${JSON.stringify(requirementsData, null, 2)}
 
@@ -307,37 +362,41 @@ The syllabus has PASSED these requirements: ${approvedNames.join(', ') || "None"
 The syllabus has FAILED these requirements: ${rejectedNames.join(', ') || "None"}
 
 Your task is to categorize ALL requirements by how well they fit this syllabus:
-1. BEST FIT: The single requirement that is the most natural and appropriate for this course (even if it doesn't fully meet all criteria)
-2. POTENTIAL FITS: Requirements that have moderate alignment with the course content (partial match)
-3. POOR FITS: Requirements that have minimal or no alignment with the course content
+1. BEST FIT (select at most 2): The requirements that are the most natural and appropriate for this course based on how well they align with the extracted Student Learning Outcomes
+2. POTENTIAL FITS: Requirements that have moderate alignment with the extracted Student Learning Outcomes
+3. POOR FITS: Requirements that have minimal or no alignment with the extracted Student Learning Outcomes
 
 For each requirement, provide:
-- A match score (0-100) indicating how well it aligns with the syllabus
-- Which SLOs (Student Learning Outcomes) are matched and which are missing
-- A brief reasoning explaining why it falls into its category
+- A match score (0-100) indicating how well it aligns with the extracted Student Learning Outcomes
+- Which SLOs (Student Learning Outcomes) from the requirement are matched with the syllabus SLOs
+- Which SLOs from the requirement are missing in the syllabus SLOs
+- A brief reasoning explaining why the requirement falls into its category
 
 A FEW IMPORTANT RULES:
-- A requirement may be the "best fit" even if it doesn't fully meet formal criteria
-- Focus on the actual content and learning objectives in the syllabus, not just technical compliance
-- Consider the deeper subject matter alignment beyond just keyword matches
+- Focus specifically on matching the EXTRACTED STUDENT LEARNING OUTCOMES from the syllabus with the SLOs listed for each requirement
+- A requirement with higher SLO matches should receive a higher match score
+- Your primary focus should be on the content of the learning outcomes, not just technical compliance or keyword matches
 - Your recommendation should help faculty understand where their course best fits in the Gen Ed curriculum
+- Select at most 2 requirements as best fits to ensure clarity for faculty members
 
 Respond in JSON with this structure:
 {
-  "bestFit": {
-    "name": "Requirement Name",
-    "matchScore": 85,
-    "matchingSLOs": [1, 2],
-    "missingSLOs": [3],
-    "reasoning": "Brief explanation of why this is the best fit..."
-  },
+  "bestFits": [
+    {
+      "name": "Requirement Name",
+      "matchScore": 85,
+      "matchingSLOs": [1, 2],
+      "missingSLOs": [3],
+      "reasoning": "Brief explanation of why this is the best fit based on SLO alignment..."
+    }
+  ],
   "potentialFits": [
     {
       "name": "Requirement Name",
       "matchScore": 60,
       "matchingSLOs": [1],
       "missingSLOs": [2, 3],
-      "reasoning": "Brief explanation of why this is a potential fit..."
+      "reasoning": "Brief explanation of why this is a potential fit based on SLO alignment..."
     }
   ],
   "poorFits": [
@@ -346,7 +405,7 @@ Respond in JSON with this structure:
       "matchScore": 15,
       "matchingSLOs": [],
       "missingSLOs": [1, 2, 3],
-      "reasoning": "Brief explanation of why this is a poor fit..."
+      "reasoning": "Brief explanation of why this is a poor fit based on SLO alignment..."
     }
   ]
 }
@@ -367,9 +426,17 @@ Respond in JSON with this structure:
     // Parse the result
     const result = JSON.parse(response.choices[0].message.content as string);
     
+    // Process the result to handle the new structure with multiple best fits
+    const bestFits = result.bestFits || [];
+    
     return {
-      bestFit: result.bestFit,
-      potentialFits: result.potentialFits || [],
+      // Take the first best fit as the primary one if available
+      bestFit: bestFits.length > 0 ? bestFits[0] : undefined,
+      // If there's a second best fit, add it to potential fits
+      potentialFits: [
+        ...(bestFits.length > 1 ? [bestFits[1]] : []),
+        ...(result.potentialFits || [])
+      ],
       poorFits: result.poorFits || [],
     };
   } catch (error) {
