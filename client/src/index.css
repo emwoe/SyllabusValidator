@@ -22,6 +22,18 @@
   border: 2px solid white;
 }
 
+/* PDF Viewer specific styling */
+.react-pdf__Page {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.react-pdf__Page__canvas {
+  margin: 0 auto;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 .document-viewer {
   position: relative;
 }
