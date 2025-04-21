@@ -90,8 +90,7 @@ export default function Help() {
                   <AccordionContent>
                     <p>
                       Yes, you can export analysis results in both PDF and CSV
-                      formats. You can also save the results to the database for
-                      future reference. All saved analyses are available in the
+                      formats. All previously run analyses are available in the
                       Database section of the site.
                     </p>
                   </AccordionContent>
