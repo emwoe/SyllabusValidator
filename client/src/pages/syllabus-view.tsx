@@ -220,98 +220,173 @@ export default function SyllabusView() {
             <CardTitle className="text-lg font-medium">Analysis Results</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Best Fit */}
-            {analysis.bestFit ? (
-              <div className="mb-4">
-                <h3 className="font-medium flex items-center text-blue-700 mb-2">
-                  <Award size={16} className="mr-1" /> Best Fit
-                </h3>
-                <div className="bg-blue-50 border border-blue-100 rounded-md p-3">
-                  <div className="flex justify-between items-center">
-                    <div className="font-medium text-blue-700">{analysis.bestFit.name}</div>
-                    <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
-                      {analysis.bestFit.matchScore}% Match
-                    </Badge>
-                  </div>
-                  
-                  <p className="text-sm text-blue-600 mt-2">
-                    {analysis.bestFit.reasoning}
-                  </p>
-                  
-                  <div className="flex flex-wrap gap-3 mt-3">
-                    <div className="flex-1 min-w-[150px]">
-                      <div className="text-xs font-medium text-blue-700 mb-1">Matching SLOs:</div>
-                      <div className="flex flex-wrap gap-1">
-                        {analysis.bestFit.matchingSLOs?.length ? (
-                          analysis.bestFit.matchingSLOs.map((slo: number) => (
-                            <Badge key={slo} variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
-                              SLO {slo}
-                            </Badge>
-                          ))
-                        ) : (
-                          <span className="text-xs text-blue-500">None</span>
-                        )}
-                      </div>
+            {/* Best Fit(s) */}
+            <div className="mb-4">
+              <h3 className="font-medium flex items-center text-blue-700 mb-2">
+                <Award size={16} className="mr-1" /> Best Fit{analysis.potentialFits?.length && analysis.potentialFits.some((fit: RequirementFit) => fit.matchScore >= 90) ? 's' : ''}
+              </h3>
+              
+              {analysis.bestFit ? (
+                <div className="space-y-3">
+                  {/* Primary Best Fit */}
+                  <div className="bg-blue-50 border border-blue-100 rounded-md p-3">
+                    <div className="flex justify-between items-center">
+                      <div className="font-medium text-blue-700">{analysis.bestFit.name}</div>
+                      <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
+                        {analysis.bestFit.matchScore}% Match
+                      </Badge>
                     </div>
                     
-                    <div className="flex-1 min-w-[150px]">
-                      <div className="text-xs font-medium text-blue-700 mb-1">Missing SLOs:</div>
-                      <div className="flex flex-wrap gap-1">
-                        {analysis.bestFit.missingSLOs?.length ? (
-                          analysis.bestFit.missingSLOs.map((slo: number) => (
-                            <Badge key={slo} variant="outline" className="bg-gray-100 text-gray-800 border-gray-200">
-                              SLO {slo}
-                            </Badge>
-                          ))
-                        ) : (
-                          <span className="text-xs text-blue-500">None</span>
-                        )}
+                    <p className="text-sm text-blue-600 mt-2">
+                      {analysis.bestFit.reasoning}
+                    </p>
+                    
+                    <div className="flex flex-wrap gap-3 mt-3">
+                      <div className="flex-1 min-w-[150px]">
+                        <div className="text-xs font-medium text-blue-700 mb-1">Matching SLOs:</div>
+                        <div className="flex flex-wrap gap-1">
+                          {analysis.bestFit.matchingSLOs?.length ? (
+                            analysis.bestFit.matchingSLOs.map((slo: number) => (
+                              <Badge key={slo} variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
+                                SLO {slo}
+                              </Badge>
+                            ))
+                          ) : (
+                            <span className="text-xs text-blue-500">None</span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="flex-1 min-w-[150px]">
+                        <div className="text-xs font-medium text-blue-700 mb-1">Missing SLOs:</div>
+                        <div className="flex flex-wrap gap-1">
+                          {analysis.bestFit.missingSLOs?.length ? (
+                            analysis.bestFit.missingSLOs.map((slo: number) => (
+                              <Badge key={slo} variant="outline" className="bg-gray-100 text-gray-800 border-gray-200">
+                                SLO {slo}
+                              </Badge>
+                            ))
+                          ) : (
+                            <span className="text-xs text-blue-500">None</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Secondary Best Fits (if any) */}
+                  {analysis.potentialFits?.filter((fit: RequirementFit) => fit.matchScore >= 90).map((fit: RequirementFit, index: number) => (
+                    <div key={index} className="bg-blue-50 border border-blue-100 rounded-md p-3 opacity-90">
+                      <div className="flex justify-between items-center">
+                        <div className="font-medium text-blue-700">{fit.name}</div>
+                        <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
+                          {fit.matchScore}% Match
+                        </Badge>
+                      </div>
+                      
+                      <p className="text-sm text-blue-600 mt-2">
+                        {fit.reasoning}
+                      </p>
+                      
+                      <div className="flex flex-wrap gap-3 mt-3">
+                        <div className="flex-1 min-w-[150px]">
+                          <div className="text-xs font-medium text-blue-700 mb-1">Matching SLOs:</div>
+                          <div className="flex flex-wrap gap-1">
+                            {fit.matchingSLOs?.length ? (
+                              fit.matchingSLOs.map((slo: number) => (
+                                <Badge key={slo} variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
+                                  SLO {slo}
+                                </Badge>
+                              ))
+                            ) : (
+                              <span className="text-xs text-blue-500">None</span>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="flex-1 min-w-[150px]">
+                          <div className="text-xs font-medium text-blue-700 mb-1">Missing SLOs:</div>
+                          <div className="flex flex-wrap gap-1">
+                            {fit.missingSLOs?.length ? (
+                              fit.missingSLOs.map((slo: number) => (
+                                <Badge key={slo} variant="outline" className="bg-gray-100 text-gray-800 border-gray-200">
+                                  SLO {slo}
+                                </Badge>
+                              ))
+                            ) : (
+                              <span className="text-xs text-blue-500">None</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
-            ) : (
-              <p className="text-sm text-neutral-500 italic mb-4">No best fit requirement identified</p>
-            )}
+              ) : (
+                <p className="text-sm text-neutral-500 italic mb-4">No best fit requirement identified</p>
+              )}
+            </div>
             
             <Separator />
 
             <div>
               <h3 className="font-medium text-green-600 flex items-center mb-2">
-                <Check size={16} className="mr-1" /> Potential Fits
+                <Check size={16} className="mr-1" /> Other Potential Fits
               </h3>
-              {analysis.approvedRequirements.length === 0 ? (
-                <p className="text-sm text-neutral-500 italic">No requirements approved</p>
-              ) : (
+              {analysis.potentialFits && analysis.potentialFits.filter((fit: RequirementFit) => fit.matchScore < 90).length > 0 ? (
                 <ul className="space-y-2">
-                  {analysis.approvedRequirements.map((req: ApprovedRequirement) => {
-                    const { bgColorClass, textColorClass } = getRequirementColors(req.name);
+                  {analysis.potentialFits.filter((fit: RequirementFit) => fit.matchScore < 90).map((fit: RequirementFit, index: number) => {
+                    const { bgColorClass, textColorClass } = getRequirementColors(fit.name);
                     // Create lighter/darker variants for the border and background
                     const bgLighterClass = bgColorClass.replace('100', '50');
                     const borderClass = bgColorClass.replace('bg', 'border');
                     return (
-                      <li key={req.name} className={`${bgLighterClass} border ${borderClass} rounded-md p-3`}>
-                        <div className={`font-medium ${textColorClass}`}>{req.name}</div>
-                        <div className={`text-sm ${textColorClass} mt-1`}>
-                          <span className="font-medium">Matching criteria:</span>
-                          <ul className="list-disc list-inside mt-1 pl-1">
-                            {req.matchingRequirements.map((match: string, idx: number) => (
-                              <li key={idx} className={`text-xs ${textColorClass} ml-2`}>{match}</li>
-                            ))}
-                          </ul>
+                      <li key={index} className={`${bgLighterClass} border ${borderClass} rounded-md p-3`}>
+                        <div className="flex justify-between items-center">
+                          <div className={`font-medium ${textColorClass}`}>{fit.name}</div>
+                          <Badge variant="outline" className={`${bgColorClass} ${textColorClass} border-${borderClass}`}>
+                            {fit.matchScore}% Match
+                          </Badge>
                         </div>
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {req.matchingSLOs.map((slo: number) => (
-                            <Badge key={slo} variant="outline" className={`${bgColorClass} ${textColorClass} border-${borderClass}`}>
-                              SLO {slo}
-                            </Badge>
-                          ))}
+                        <p className={`text-sm ${textColorClass} mt-2`}>
+                          {fit.reasoning}
+                        </p>
+                        <div className="flex flex-wrap gap-3 mt-3">
+                          <div className="flex-1 min-w-[150px]">
+                            <div className={`text-xs font-medium ${textColorClass} mb-1`}>Matching SLOs:</div>
+                            <div className="flex flex-wrap gap-1">
+                              {fit.matchingSLOs?.length ? (
+                                fit.matchingSLOs.map((slo: number) => (
+                                  <Badge key={slo} variant="outline" className={`${bgColorClass} ${textColorClass} border-${borderClass}`}>
+                                    SLO {slo}
+                                  </Badge>
+                                ))
+                              ) : (
+                                <span className={`text-xs ${textColorClass}`}>None</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex-1 min-w-[150px]">
+                            <div className={`text-xs font-medium ${textColorClass} mb-1`}>Missing SLOs:</div>
+                            <div className="flex flex-wrap gap-1">
+                              {fit.missingSLOs?.length ? (
+                                fit.missingSLOs.map((slo: number) => (
+                                  <Badge key={slo} variant="outline" className="bg-gray-100 text-gray-800 border-gray-200">
+                                    SLO {slo}
+                                  </Badge>
+                                ))
+                              ) : (
+                                <span className={`text-xs ${textColorClass}`}>None</span>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </li>
                     );
                   })}
                 </ul>
+              ) : (
+                <p className="text-sm text-neutral-500 italic">No other potential fits identified</p>
               )}
             </div>
             
