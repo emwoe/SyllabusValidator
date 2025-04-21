@@ -223,7 +223,7 @@ export default function SyllabusView() {
             {/* Best Fit(s) */}
             <div className="mb-4">
               <h3 className="font-medium flex items-center text-blue-700 mb-2">
-                <Award size={16} className="mr-1" /> Best Fit{analysis.potentialFits?.length && analysis.potentialFits.some((fit: RequirementFit) => fit.matchScore >= 90) ? 's' : ''}
+                <Award size={16} className="mr-1" /> Best Fit{analysis.potentialFits?.length && analysis.potentialFits.some((fit: RequirementFit) => fit.matchScore >= 70) ? 's' : ''}
               </h3>
               
               {analysis.bestFit ? (
@@ -275,7 +275,7 @@ export default function SyllabusView() {
                   </div>
                   
                   {/* Secondary Best Fits (if any) */}
-                  {analysis.potentialFits?.filter((fit: RequirementFit) => fit.matchScore >= 90).map((fit: RequirementFit, index: number) => (
+                  {analysis.potentialFits?.filter((fit: RequirementFit) => fit.matchScore >= 70).map((fit: RequirementFit, index: number) => (
                     <div key={index} className="bg-blue-50 border border-blue-100 rounded-md p-3 opacity-90">
                       <div className="flex justify-between items-center">
                         <div className="font-medium text-blue-700">{fit.name}</div>
@@ -333,9 +333,9 @@ export default function SyllabusView() {
               <h3 className="font-medium text-green-600 flex items-center mb-2">
                 <Check size={16} className="mr-1" /> Other Potential Fits
               </h3>
-              {analysis.potentialFits && analysis.potentialFits.filter((fit: RequirementFit) => fit.matchScore < 90).length > 0 ? (
+              {analysis.potentialFits && analysis.potentialFits.filter((fit: RequirementFit) => fit.matchScore < 70).length > 0 ? (
                 <ul className="space-y-2">
-                  {analysis.potentialFits.filter((fit: RequirementFit) => fit.matchScore < 90).map((fit: RequirementFit, index: number) => {
+                  {analysis.potentialFits.filter((fit: RequirementFit) => fit.matchScore < 70).map((fit: RequirementFit, index: number) => {
                     const { bgColorClass, textColorClass } = getRequirementColors(fit.name);
                     // Create lighter/darker variants for the border and background
                     const bgLighterClass = bgColorClass.replace('100', '50');
