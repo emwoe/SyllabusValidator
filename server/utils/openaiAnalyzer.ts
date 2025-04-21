@@ -28,12 +28,16 @@ async function extractSyllabusLearningOutcomes(syllabusText: string): Promise<st
           content: 
             "You are an expert academic syllabus analyzer. Your task is to extract the Student Learning Outcomes (SLOs) " +
             "from the syllabus. These are typically found in sections labeled 'Learning Outcomes', 'Student Learning Outcomes', " +
-            "'Course Objectives', 'Learning Objectives', or similar. Look for numbered or bulleted lists of skills or knowledge " +
-            "students should gain from the course. Only extract the actual SLOs, not surrounding text."
+            "'Course Objectives', 'Learning Objectives', 'Learning Goals', 'Course Learning Outcomes', or similar. " +
+            "Look for numbered or bulleted lists of skills or knowledge students should gain from the course. " +
+            "SLOs often start with action verbs like 'analyze', 'evaluate', 'understand', 'demonstrate', 'identify', etc. " +
+            "Focus on statements that describe what students will be able to do or know by the end of the course. " +
+            "ONLY extract the actual SLOs, not surrounding explanatory text. If no explicit SLOs are found, extract statements " +
+            "that most clearly describe the intended learning outcomes from the course."
         },
         {
           role: "user",
-          content: `Extract all Student Learning Outcomes from this syllabus. Return just the SLOs in a numbered list format:\n\n${syllabusText.substring(0, 15000)}`,
+          content: `Extract all Student Learning Outcomes from this syllabus. Format each SLO as a numbered list item, starting with an action verb when possible. Focus on statements that describe what students will learn or be able to do:\n\n${syllabusText.substring(0, 15000)}`,
         },
       ],
     });
@@ -45,7 +49,10 @@ async function extractSyllabusLearningOutcomes(syllabusText: string): Promise<st
       return "No clear Student Learning Outcomes could be identified in the syllabus.";
     }
     
-    console.log("Successfully extracted Student Learning Outcomes");
+    console.log("Successfully extracted Student Learning Outcomes:");
+    console.log("==== EXTRACTED SLOs ====");
+    console.log(extractedSLOs);
+    console.log("==== END EXTRACTED SLOs ====");
     return extractedSLOs;
   } catch (error) {
     console.error("Error extracting SLOs:", error);
@@ -428,6 +435,16 @@ Respond in JSON with this structure:
     
     // Process the result to handle the new structure with multiple best fits
     const bestFits = result.bestFits || [];
+    
+    if (bestFits.length > 0) {
+      console.log(`Found ${bestFits.length} best fits:`);
+      bestFits.forEach((fit, index) => {
+        console.log(`${index + 1}. ${fit.name} (Score: ${fit.matchScore}%, Matching SLOs: ${fit.matchingSLOs.length}, Missing SLOs: ${fit.missingSLOs.length})`);
+        console.log(`   Reasoning: ${fit.reasoning}`);
+      });
+    } else {
+      console.log("No best fits found in the analysis");
+    }
     
     return {
       // Take the first best fit as the primary one if available
