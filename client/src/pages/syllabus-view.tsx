@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useRoute } from "wouter";
 import { getAnalysisById } from "@/lib/api";
-import { Analysis, ApprovedRequirement, RejectedRequirement } from "@shared/schema";
+import { Analysis, ApprovedRequirement, RejectedRequirement, RequirementFit } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Check, XCircle, FileText, User, Clock } from "lucide-react";
+import { ArrowLeft, Check, XCircle, FileText, User, Clock, Target, Award, ThumbsUp, ThumbsDown } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { getRequirementColors } from "@/lib/requirementColors";
 
@@ -153,7 +153,7 @@ export default function SyllabusView() {
             <CardHeader className="pb-3">
               <CardTitle className="text-lg font-medium">Analysis Results</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <div>
                 <h3 className="font-medium text-green-600 flex items-center mb-2">
                   <Check size={16} className="mr-1" /> Approved Requirements
@@ -224,6 +224,134 @@ export default function SyllabusView() {
                     ))}
                   </ul>
                 )}
+              </div>
+
+              <Separator />
+
+              {/* Requirement Fit Analysis section */}
+              <div>
+                <h3 className="font-medium text-violet-600 flex items-center mb-3">
+                  <Target size={16} className="mr-1" /> Requirement Fit Analysis
+                </h3>
+                
+                {/* Best Fit */}
+                {analysis.bestFit ? (
+                  <div className="mb-4">
+                    <h4 className="font-medium flex items-center text-blue-700 mb-2">
+                      <Award size={14} className="mr-1" /> Best Fit
+                    </h4>
+                    <div className="bg-blue-50 border border-blue-100 rounded-md p-3">
+                      <div className="flex justify-between items-center">
+                        <div className="font-medium text-blue-700">{analysis.bestFit.name}</div>
+                        <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
+                          {analysis.bestFit.matchScore}% Match
+                        </Badge>
+                      </div>
+                      
+                      <p className="text-sm text-blue-600 mt-2">
+                        {analysis.bestFit.reasoning}
+                      </p>
+                      
+                      <div className="flex flex-wrap gap-3 mt-3">
+                        <div className="flex-1 min-w-[150px]">
+                          <div className="text-xs font-medium text-blue-700 mb-1">Matching SLOs:</div>
+                          <div className="flex flex-wrap gap-1">
+                            {analysis.bestFit.matchingSLOs?.length ? (
+                              analysis.bestFit.matchingSLOs.map((slo) => (
+                                <Badge key={slo} variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">
+                                  SLO {slo}
+                                </Badge>
+                              ))
+                            ) : (
+                              <span className="text-xs text-blue-500">None</span>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="flex-1 min-w-[150px]">
+                          <div className="text-xs font-medium text-blue-700 mb-1">Missing SLOs:</div>
+                          <div className="flex flex-wrap gap-1">
+                            {analysis.bestFit.missingSLOs?.length ? (
+                              analysis.bestFit.missingSLOs.map((slo) => (
+                                <Badge key={slo} variant="outline" className="bg-gray-100 text-gray-800 border-gray-200">
+                                  SLO {slo}
+                                </Badge>
+                              ))
+                            ) : (
+                              <span className="text-xs text-blue-500">None</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-neutral-500 italic mb-4">No best fit requirement identified</p>
+                )}
+                
+                {/* Potential Fits */}
+                <div className="mb-4">
+                  <h4 className="font-medium flex items-center text-amber-600 mb-2">
+                    <ThumbsUp size={14} className="mr-1" /> Potential Fits
+                  </h4>
+                  
+                  {analysis.potentialFits?.length ? (
+                    <ul className="space-y-2">
+                      {analysis.potentialFits.map((fit: RequirementFit) => (
+                        <li key={fit.name} className="bg-amber-50 border border-amber-100 rounded-md p-3">
+                          <div className="flex justify-between items-center">
+                            <div className="font-medium text-amber-700">{fit.name}</div>
+                            <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">
+                              {fit.matchScore}% Match
+                            </Badge>
+                          </div>
+                          
+                          <p className="text-sm text-amber-600 mt-2">
+                            {fit.reasoning}
+                          </p>
+                          
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {fit.matchingSLOs?.map((slo) => (
+                              <Badge key={slo} variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">
+                                SLO {slo}
+                              </Badge>
+                            ))}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-neutral-500 italic">No potential fits identified</p>
+                  )}
+                </div>
+                
+                {/* Poor Fits */}
+                <div>
+                  <h4 className="font-medium flex items-center text-neutral-500 mb-2">
+                    <ThumbsDown size={14} className="mr-1" /> Poor Fits
+                  </h4>
+                  
+                  {analysis.poorFits?.length ? (
+                    <ul className="space-y-2">
+                      {analysis.poorFits.map((fit: RequirementFit) => (
+                        <li key={fit.name} className="bg-gray-50 border border-gray-200 rounded-md p-3">
+                          <div className="flex justify-between items-center">
+                            <div className="font-medium text-gray-700">{fit.name}</div>
+                            <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-200">
+                              {fit.matchScore}% Match
+                            </Badge>
+                          </div>
+                          
+                          <p className="text-sm text-gray-600 mt-2">
+                            {fit.reasoning}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-sm text-neutral-500 italic">No poor fits identified</p>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>

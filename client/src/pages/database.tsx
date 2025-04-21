@@ -2,10 +2,11 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Analysis } from "@shared/schema";
 import { formatDate } from "@/lib/utils";
-import { Eye } from "lucide-react";
+import { Eye, Award } from "lucide-react";
 import { Link } from "wouter";
 import DeleteAnalysisButton from "@/components/DeleteAnalysisButton";
 import { getRequirementColors } from "@/lib/requirementColors";
@@ -121,6 +122,9 @@ export default function Database() {
                       Approved Requirements
                     </th>
                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-neutral-600 uppercase tracking-wider">
+                      Best Fit
+                    </th>
+                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-neutral-600 uppercase tracking-wider">
                       File Type
                     </th>
                     <th scope="col" className="px-6 py-4 text-right text-xs font-semibold text-neutral-600 uppercase tracking-wider">
@@ -170,6 +174,26 @@ export default function Database() {
                             <span className="text-sm text-neutral-500">None</span>
                           )}
                         </div>
+                      </td>
+                      <td className="px-6 py-5 whitespace-nowrap">
+                        {analysis.bestFit ? (
+                          <div className="flex items-center">
+                            <Badge 
+                              variant="outline" 
+                              className="bg-blue-50 text-blue-700 border-blue-100 flex items-center gap-1.5"
+                            >
+                              <Award size={12} className="text-blue-500" />
+                              {analysis.bestFit.name}
+                              {analysis.bestFit.matchScore && (
+                                <span className="text-blue-500 text-xs ml-1">
+                                  {analysis.bestFit.matchScore}%
+                                </span>
+                              )}
+                            </Badge>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-neutral-500">None identified</span>
+                        )}
                       </td>
                       <td className="px-6 py-5 whitespace-nowrap">
                         <div className="text-sm text-neutral-500">
