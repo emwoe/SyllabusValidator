@@ -28,6 +28,7 @@ export const analyses = pgTable("analyses", {
   approvedRequirements: jsonb("approved_requirements").notNull(),
   rejectedRequirements: jsonb("rejected_requirements").notNull(),
   content: text("content"),  // Store the extracted document text
+  documentPath: text("document_path"), // Store the path to the original document
   bestFit: jsonb("best_fit"),  // Store the best matching requirement
   potentialFits: jsonb("potential_fits"),  // Store requirements with moderate alignment
   poorFits: jsonb("poor_fits"),  // Store requirements with minimal alignment
@@ -90,6 +91,8 @@ export interface AnalysisResult {
   uploadDate: Date;
   approvedRequirements: ApprovedRequirement[];
   rejectedRequirements: RejectedRequirement[];
+  content?: string;                  // Extracted text content
+  documentPath?: string;             // Path to the stored original document
   // New fit categorization for better requirement analysis
   bestFit?: RequirementFit;          // Single best matching requirement
   potentialFits?: RequirementFit[];  // Requirements with moderate alignment

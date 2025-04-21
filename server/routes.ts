@@ -86,16 +86,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         bestFit: analysisResult.bestFit,
         potentialFits: analysisResult.potentialFits,
         poorFits: analysisResult.poorFits,
-        content: text // Store the original extracted text
+        content: text, // Store the original extracted text
+        documentPath: "" // Will be set after file is copied
       };
 
       // Validate the data before storing
       const parsedData = insertAnalysisSchema.parse(analysisData);
       
+      // Create a unique stored filename for the document
+      const documentsDir = path.join(import.meta.dirname, "../uploads/documents");
+      if (!fs.existsSync(documentsDir)) {
+        fs.mkdirSync(documentsDir, { recursive: true });
+      }
+      
+      // Generate document ID and path for storage
+      const documentId = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      const storedFilename = `document-${documentId}${path.extname(file.originalname)}`;
+      const storedPath = path.join(documentsDir, storedFilename);
+      
+      // Save a copy of the original file in the documents directory
+      fs.copyFileSync(file.path, storedPath);
+      
+      // Add the document path to the analysis data
+      parsedData.documentPath = storedFilename;
+      
       // Store the analysis in the database
       const savedAnalysis = await storage.createAnalysis(parsedData);
 
-      // Clean up the uploaded file
+      // Clean up the temporary uploaded file
       fs.unlinkSync(file.path);
 
       // Return the analysis result
@@ -222,6 +240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             approvedRequirements: analysisResult.approvedRequirements,
             rejectedRequirements: analysisResult.rejectedRequirements,
             content: text, // Store the original document text
+            documentPath: "", // Will be set after file is copied
             bestFit: analysisResult.bestFit,
             potentialFits: analysisResult.potentialFits,
             poorFits: analysisResult.poorFits
@@ -229,6 +248,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Validate the data before storing
           const parsedData = insertAnalysisSchema.parse(analysisData);
+          
+          // Create a unique stored filename for the document
+          const documentsDir = path.join(import.meta.dirname, "../uploads/documents");
+          if (!fs.existsSync(documentsDir)) {
+            fs.mkdirSync(documentsDir, { recursive: true });
+          }
+          
+          // Generate document ID and path for storage
+          const documentId = Date.now() + '-' + Math.round(Math.random() * 1E9);
+          const storedFilename = `document-${documentId}${path.extname(file.originalname)}`;
+          const storedPath = path.join(documentsDir, storedFilename);
+          
+          // Save a copy of the original file in the documents directory
+          fs.copyFileSync(file.path, storedPath);
+          
+          // Add the document path to the analysis data
+          parsedData.documentPath = storedFilename;
           
           // Store the analysis in the database
           const savedAnalysis = await storage.createAnalysis(parsedData);
@@ -248,10 +284,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             bestFit: analysisResult.bestFit,
             potentialFits: analysisResult.potentialFits,
             poorFits: analysisResult.poorFits,
-            content: text // Include the extracted text
+            content: text, // Include the extracted text
+            documentPath: storedFilename // Include the document path
           });
           
-          // Clean up the uploaded file
+          // Clean up the temporary uploaded file
           fs.unlinkSync(file.path);
           
         } catch (fileError: any) {
