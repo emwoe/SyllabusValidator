@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Check, XCircle, FileText, User, Clock, Target, Award, ThumbsUp, ThumbsDown } from "lucide-react";
+import { ArrowLeft, Check, XCircle, FileText, User, Clock, Target, Award, ThumbsUp, ThumbsDown, ExternalLink } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { getRequirementColors } from "@/lib/requirementColors";
 
@@ -17,6 +17,7 @@ export default function SyllabusView() {
   const id = match && params?.id ? parseInt(params.id) : undefined;
   const [syllabusText, setSyllabusText] = useState("");
   const [fileType, setFileType] = useState("");
+  const [documentPath, setDocumentPath] = useState<string | null>(null);
   const [isLoadingSyllabus, setIsLoadingSyllabus] = useState(false);
 
   const { data: analysis, isLoading } = useQuery({
@@ -37,6 +38,7 @@ export default function SyllabusView() {
         const data = await response.json();
         setSyllabusText(data.content);
         setFileType(data.fileType || "");
+        setDocumentPath(data.documentPath);
       } catch (error) {
         console.error("Error loading syllabus content:", error);
       } finally {

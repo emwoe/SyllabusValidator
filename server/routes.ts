@@ -355,7 +355,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Return the actual syllabus content
         res.status(200).json({ 
           content: analysis.content,
-          fileType: analysis.fileType
+          fileType: analysis.fileType,
+          documentPath: analysis.documentPath || null
         });
       } else {
         // Fallback for legacy analyses without stored content
@@ -380,12 +381,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
             `Uploaded: ${new Date(analysis.uploadDate).toLocaleString()}\n\n` +
             `APPROVED REQUIREMENTS:\n${approvedReqs}\n\n` +
             `REJECTED REQUIREMENTS:\n${rejectedReqs}`,
-          fileType: analysis.fileType
+          fileType: analysis.fileType,
+          documentPath: analysis.documentPath || null
         });
       }
     } catch (error: any) {
       console.error("Error fetching syllabus content:", error);
       res.status(500).json({ message: error.message || "Failed to fetch syllabus content" });
+    }
+  });
+  
+  // API route to serve document files
+  app.get("/api/documents/:filename", (req, res) => {
+    try {
+      const { filename } = req.params;
+      
+      // Prevent path traversal attacks
+      if (filename.includes('..') || filename.includes('/')) {
+        return res.status(400).json({ message: "Invalid filename" });
+      }
+      
+      const documentsDir = path.join(import.meta.dirname, "../uploads/documents");
+      const filePath = path.join(documentsDir, filename);
+      
+      // Check if file exists
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      
+      // Determine content type based on file extension
+      const ext = path.extname(filename).toLowerCase();
+      let contentType = "application/octet-stream"; // Default
+      
+      if (ext === '.pdf') {
+        contentType = 'application/pdf';
+      } else if (ext === '.doc') {
+        contentType = 'application/msword';
+      } else if (ext === '.docx') {
+        contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      }
+      
+      // Set content type and send file
+      res.setHeader("Content-Type", contentType);
+      res.setHeader("Content-Disposition", `inline; filename="${filename}"`);
+      
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(res);
+    } catch (error: any) {
+      console.error("Error serving document:", error);
+      res.status(500).json({ message: error.message || "Failed to serve document" });
     }
   });
 
