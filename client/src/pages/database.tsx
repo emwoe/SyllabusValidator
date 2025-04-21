@@ -254,15 +254,14 @@ export default function Database() {
                             return otherPotentialFits.length > 0 ? (
                               otherPotentialFits.map((fit: RequirementFit, idx: number) => {
                                 const { bgColorClass, textColorClass } = getRequirementColors(fit.name);
-                                const bgLighterClass = bgColorClass.replace('100', '50');
                                 
                                 return (
                                   <span 
                                     key={`${analysis.id}-otherpotential-${idx}`}
-                                    className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${bgLighterClass} ${textColorClass}`}
+                                    className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${bgColorClass} ${textColorClass}`}
                                   >
                                     {fit.name}
-                                    <span className="text-xs ml-1 opacity-75">{fit.matchScore}%</span>
+                                    <span className={`text-xs ml-1 ${textColorClass}`}>{fit.matchScore}%</span>
                                   </span>
                                 );
                               })
