@@ -156,7 +156,7 @@ export default function SyllabusView() {
             <CardContent className="space-y-6">
               <div>
                 <h3 className="font-medium text-green-600 flex items-center mb-2">
-                  <Check size={16} className="mr-1" /> Approved Requirements
+                  <Check size={16} className="mr-1" /> Potential Fits
                 </h3>
                 {analysis.approvedRequirements.length === 0 ? (
                   <p className="text-sm text-neutral-500 italic">No requirements approved</p>
@@ -196,7 +196,7 @@ export default function SyllabusView() {
               
               <div>
                 <h3 className="font-medium text-red-600 flex items-center mb-2">
-                  <XCircle size={16} className="mr-1" /> Rejected Requirements
+                  <XCircle size={16} className="mr-1" /> Does Not Meet Requirements For
                 </h3>
                 {analysis.rejectedRequirements.length === 0 ? (
                   <p className="text-sm text-neutral-500 italic">No requirements rejected</p>
@@ -292,7 +292,7 @@ export default function SyllabusView() {
                 {/* Potential Fits */}
                 <div className="mb-4">
                   <h4 className="font-medium flex items-center text-amber-600 mb-2">
-                    <ThumbsUp size={14} className="mr-1" /> Potential Fits
+                    <ThumbsUp size={14} className="mr-1" /> Secondary Match
                   </h4>
                   
                   {analysis.potentialFits?.length ? (

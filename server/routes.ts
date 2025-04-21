@@ -85,7 +85,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rejectedRequirements: analysisResult.rejectedRequirements,
         bestFit: analysisResult.bestFit,
         potentialFits: analysisResult.potentialFits,
-        poorFits: analysisResult.poorFits
+        poorFits: analysisResult.poorFits,
+        content: text // Store the original extracted text
       };
 
       // Validate the data before storing
@@ -111,7 +112,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         analysisMethod: analysisMethod,
         bestFit: analysisResult.bestFit,
         potentialFits: analysisResult.potentialFits,
-        poorFits: analysisResult.poorFits
+        poorFits: analysisResult.poorFits,
+        content: text // Include the extracted text in the response
       });
     } catch (error: any) {
       console.error("Error analyzing syllabus:", error);
@@ -245,7 +247,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             analysisMethod,
             bestFit: analysisResult.bestFit,
             potentialFits: analysisResult.potentialFits,
-            poorFits: analysisResult.poorFits
+            poorFits: analysisResult.poorFits,
+            content: text // Include the extracted text
           });
           
           // Clean up the uploaded file
