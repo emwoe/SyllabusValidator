@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { AnalysisResult, ApprovedRequirement, RejectedRequirement } from "@shared/schema";
+import { AnalysisResult, ApprovedRequirement, RejectedRequirement, RequirementFit } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/lib/utils";
+import { getRequirementColors } from "@/lib/requirementColors";
 
 interface AnalysisResultsProps {
   result: AnalysisResult | null;
@@ -143,6 +144,133 @@ export default function AnalysisResults({ result, isAnalyzing, isMultiple = fals
                 </p>
               </div>
             </div>
+            
+            {/* Best Fit Section */}
+            {result.bestFit && (
+              <div className="mb-6 bg-gradient-to-r from-primary/5 to-transparent p-5 rounded-lg border border-primary/10">
+                <h3 className="font-medium text-neutral-900 mb-3 flex items-center">
+                  <span className="material-icons text-primary mr-1">stars</span>
+                  Best Fit for Gen Ed Requirements
+                </h3>
+                
+                <div className="bg-white rounded-lg border border-neutral-100 overflow-hidden">
+                  <div className="px-4 py-3">
+                    {/* Requirement name with score */}
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        {/* Use the requirementColors utility to get consistent styling */}
+                        {(() => {
+                          const colors = getRequirementColors(result.bestFit.name);
+                          return (
+                            <span className={`inline-flex items-center px-3 py-1 rounded-md text-sm font-medium ${colors.bgColorClass} ${colors.textColorClass}`}>
+                              {result.bestFit.name}
+                            </span>
+                          );
+                        })()}
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-sm font-medium mr-1">Match Score:</span>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                          result.bestFit.matchScore >= 80 ? "bg-green-100 text-green-800" :
+                          result.bestFit.matchScore >= 60 ? "bg-amber-100 text-amber-800" :
+                          "bg-orange-100 text-orange-800"
+                        }`}>
+                          {result.bestFit.matchScore}%
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Reasoning */}
+                    <div className="mt-2 text-sm text-neutral-700 bg-neutral-50 p-3 rounded-md">
+                      <p className="font-medium mb-1">Reasoning:</p>
+                      <p>{result.bestFit.reasoning}</p>
+                    </div>
+                    
+                    {/* SLO matches */}
+                    <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <h4 className="text-sm font-medium text-neutral-900 mb-1">Matching SLOs:</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {result.bestFit.matchingSLOs && result.bestFit.matchingSLOs.length > 0 ? (
+                            result.bestFit.matchingSLOs.map((slo) => (
+                              <span 
+                                key={`best-match-slo-${slo}`}
+                                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary"
+                              >
+                                SLO {slo}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-sm text-neutral-500">No matching SLOs</span>
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium text-neutral-900 mb-1">Missing SLOs:</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {result.bestFit.missingSLOs && result.bestFit.missingSLOs.length > 0 ? (
+                            result.bestFit.missingSLOs.map((slo) => (
+                              <span 
+                                key={`best-missing-slo-${slo}`}
+                                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-neutral-100 text-neutral-600"
+                              >
+                                SLO {slo}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-sm text-neutral-500">No missing SLOs</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Show the second best fit in potential fits section if there is one */}
+            {result.potentialFits && result.potentialFits.length > 0 && result.potentialFits[0]?.matchScore >= 70 && (
+              <div className="mb-6">
+                <h3 className="font-medium text-neutral-900 mb-2 flex items-center">
+                  <span className="material-icons text-amber-500 mr-1">trending_up</span>
+                  Secondary Match
+                </h3>
+                
+                <div className="bg-white rounded-lg border border-neutral-100 overflow-hidden">
+                  <div className="px-4 py-3">
+                    {/* Requirement name with score */}
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        {(() => {
+                          const colors = getRequirementColors(result.potentialFits[0].name);
+                          return (
+                            <span className={`inline-flex items-center px-3 py-1 rounded-md text-sm font-medium ${colors.bgColorClass} ${colors.textColorClass}`}>
+                              {result.potentialFits[0].name}
+                            </span>
+                          );
+                        })()}
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-sm font-medium mr-1">Match Score:</span>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                          result.potentialFits[0].matchScore >= 80 ? "bg-green-100 text-green-800" :
+                          result.potentialFits[0].matchScore >= 60 ? "bg-amber-100 text-amber-800" :
+                          "bg-orange-100 text-orange-800"
+                        }`}>
+                          {result.potentialFits[0].matchScore}%
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Reasoning */}
+                    <div className="mt-2 text-sm text-neutral-700 bg-neutral-50 p-3 rounded-md">
+                      <p className="font-medium mb-1">Reasoning:</p>
+                      <p>{result.potentialFits[0].reasoning}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             
             {/* Approved requirements */}
             {result.approvedRequirements.length > 0 && (

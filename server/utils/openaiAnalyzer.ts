@@ -438,7 +438,7 @@ Respond in JSON with this structure:
     
     if (bestFits.length > 0) {
       console.log(`Found ${bestFits.length} best fits:`);
-      bestFits.forEach((fit, index) => {
+      bestFits.forEach((fit: RequirementFit, index: number) => {
         console.log(`${index + 1}. ${fit.name} (Score: ${fit.matchScore}%, Matching SLOs: ${fit.matchingSLOs.length}, Missing SLOs: ${fit.missingSLOs.length})`);
         console.log(`   Reasoning: ${fit.reasoning}`);
       });
