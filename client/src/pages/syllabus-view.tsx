@@ -363,13 +363,26 @@ export default function SyllabusView() {
         <div className="lg:col-span-2">
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-medium flex items-center gap-2">
-                <FileText size={18} />
-                Syllabus Document
-                {analysis.fileType && (
-                  <Badge variant="outline" className="uppercase text-xs ml-1">
-                    {analysis.fileType.replace('.', '')}
-                  </Badge>
+              <CardTitle className="text-lg font-medium flex items-center gap-2 justify-between">
+                <div className="flex items-center">
+                  <FileText size={18} className="mr-2" />
+                  Syllabus Document
+                  {analysis.fileType && (
+                    <Badge variant="outline" className="uppercase text-xs ml-1">
+                      {analysis.fileType.replace('.', '')}
+                    </Badge>
+                  )}
+                </div>
+                {documentPath && (
+                  <Button 
+                    variant="outline" 
+                    className="gap-1" 
+                    size="sm"
+                    onClick={() => window.open(`/api/documents/${documentPath}`, '_blank')}
+                  >
+                    <ExternalLink size={14} />
+                    View Original
+                  </Button>
                 )}
               </CardTitle>
             </CardHeader>
@@ -386,9 +399,26 @@ export default function SyllabusView() {
                 <div className="document-viewer">
                   <div className="flex items-center justify-between mb-3 pb-2 border-b">
                     <div className="flex items-center">
-                      <span className="font-medium text-gray-700">Original document content</span>
+                      <span className="font-medium text-gray-700">
+                        {documentPath && fileType.toLowerCase() === '.pdf' 
+                          ? 'PDF Document Viewer'
+                          : 'Original document content'}
+                      </span>
                     </div>
                   </div>
+                  
+                  {/* PDF Viewer for PDF files when documentPath is available */}
+                  {documentPath && fileType.toLowerCase() === '.pdf' ? (
+                    <div className="mb-4">
+                      <iframe 
+                        src={`/api/documents/${documentPath}`}
+                        className="w-full h-[500px] border border-gray-200 rounded"
+                        title="PDF Document"
+                      ></iframe>
+                      <Separator className="my-4" />
+                      <h3 className="text-base font-medium mb-3">Extracted Text:</h3>
+                    </div>
+                  ) : null}
                   
                   <div className="p-6 bg-white rounded-md border shadow-sm max-h-[600px] overflow-y-auto document-scroll">
                     {/* Document content with styling based on file type */}
