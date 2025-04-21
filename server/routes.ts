@@ -213,7 +213,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             fileType: path.extname(file.originalname).toLowerCase(),
             approvedRequirements: analysisResult.approvedRequirements,
             rejectedRequirements: analysisResult.rejectedRequirements,
-            content: text // Store the original document text
+            content: text, // Store the original document text
+            bestFit: analysisResult.bestFit,
+            potentialFits: analysisResult.potentialFits,
+            poorFits: analysisResult.poorFits
           };
           
           // Validate the data before storing
@@ -233,7 +236,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             fileSize: file.size,
             fileType: path.extname(file.originalname).toLowerCase(),
             uploadDate: savedAnalysis.uploadDate,
-            analysisMethod
+            analysisMethod,
+            bestFit: analysisResult.bestFit,
+            potentialFits: analysisResult.potentialFits,
+            poorFits: analysisResult.poorFits
           });
           
           // Clean up the uploaded file

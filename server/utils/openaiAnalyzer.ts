@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { AnalysisResult, ApprovedRequirement, RejectedRequirement } from "@shared/schema";
+import { AnalysisResult, ApprovedRequirement, RejectedRequirement, RequirementFit } from "@shared/schema";
 import { GenEdRequirement } from "./genEdAnalyzer";
 import { config } from "../config";
 
@@ -63,11 +63,18 @@ export async function analyzeWithOpenAI(
 
     console.log(`OpenAI analysis summary: ${approvedRequirements.length} approved, ${rejectedRequirements.length} rejected requirements`);
     
+    // Determine requirement fit categories
+    console.log("Determining best fit, potential fits, and poor fits...");
+    const fitResults = await determineRequirementFits(syllabusText, approvedRequirements, rejectedRequirements, genEdRequirements);
+    
     return {
       courseName: courseInfo.name,
       courseCode: courseInfo.code,
       approvedRequirements,
       rejectedRequirements,
+      bestFit: fitResults.bestFit,
+      potentialFits: fitResults.potentialFits,
+      poorFits: fitResults.poorFits,
     };
   } catch (error) {
     console.error("Error analyzing with OpenAI:", error);
@@ -250,4 +257,124 @@ Respond only in JSON format with this structure:
   }
 
   return { approved, rejected };
+}
+
+/**
+ * Determine which requirements best fit the syllabus
+ * @param syllabusText The syllabus text to analyze
+ * @param approvedRequirements List of requirements that the syllabus meets
+ * @param rejectedRequirements List of requirements that the syllabus does not meet
+ * @param genEdRequirements Full list of Gen Ed requirements
+ * @returns Promise<{bestFit?: RequirementFit, potentialFits: RequirementFit[], poorFits: RequirementFit[]}>
+ */
+async function determineRequirementFits(
+  syllabusText: string,
+  approvedRequirements: ApprovedRequirement[],
+  rejectedRequirements: RejectedRequirement[],
+  genEdRequirements: GenEdRequirement[]
+): Promise<{
+  bestFit?: RequirementFit, 
+  potentialFits: RequirementFit[], 
+  poorFits: RequirementFit[]
+}> {
+  try {
+    // Truncate syllabus to avoid token limits
+    const truncatedSyllabus = syllabusText.substring(0, 10000);
+    
+    // Prepare requirements data
+    const requirementsData = genEdRequirements.map(req => ({
+      name: req.name,
+      description: req.description,
+      slos: req.slos,
+    }));
+    
+    // Prepare approved and rejected requirements summaries
+    const approvedNames = approvedRequirements.map(r => r.name);
+    const rejectedNames = rejectedRequirements.map(r => r.name);
+    
+    // Create a prompt for OpenAI to analyze requirement fits
+    const prompt = `
+You are an expert in analyzing academic syllabi against General Education requirements.
+
+SYLLABUS TEXT (excerpt):
+${truncatedSyllabus}
+
+REQUIREMENTS:
+${JSON.stringify(requirementsData, null, 2)}
+
+CURRENT ANALYSIS:
+The syllabus has PASSED these requirements: ${approvedNames.join(', ') || "None"}
+The syllabus has FAILED these requirements: ${rejectedNames.join(', ') || "None"}
+
+Your task is to categorize ALL requirements by how well they fit this syllabus:
+1. BEST FIT: The single requirement that is the most natural and appropriate for this course (even if it doesn't fully meet all criteria)
+2. POTENTIAL FITS: Requirements that have moderate alignment with the course content (partial match)
+3. POOR FITS: Requirements that have minimal or no alignment with the course content
+
+For each requirement, provide:
+- A match score (0-100) indicating how well it aligns with the syllabus
+- Which SLOs (Student Learning Outcomes) are matched and which are missing
+- A brief reasoning explaining why it falls into its category
+
+A FEW IMPORTANT RULES:
+- A requirement may be the "best fit" even if it doesn't fully meet formal criteria
+- Focus on the actual content and learning objectives in the syllabus, not just technical compliance
+- Consider the deeper subject matter alignment beyond just keyword matches
+- Your recommendation should help faculty understand where their course best fits in the Gen Ed curriculum
+
+Respond in JSON with this structure:
+{
+  "bestFit": {
+    "name": "Requirement Name",
+    "matchScore": 85,
+    "matchingSLOs": [1, 2],
+    "missingSLOs": [3],
+    "reasoning": "Brief explanation of why this is the best fit..."
+  },
+  "potentialFits": [
+    {
+      "name": "Requirement Name",
+      "matchScore": 60,
+      "matchingSLOs": [1],
+      "missingSLOs": [2, 3],
+      "reasoning": "Brief explanation of why this is a potential fit..."
+    }
+  ],
+  "poorFits": [
+    {
+      "name": "Requirement Name",
+      "matchScore": 15,
+      "matchingSLOs": [],
+      "missingSLOs": [1, 2, 3],
+      "reasoning": "Brief explanation of why this is a poor fit..."
+    }
+  ]
+}
+`;
+
+    // Make the AI request
+    const response = await openai.chat.completions.create({
+      model: MODEL,
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      response_format: { type: "json_object" },
+    });
+
+    // Parse the result
+    const result = JSON.parse(response.choices[0].message.content as string);
+    
+    return {
+      bestFit: result.bestFit,
+      potentialFits: result.potentialFits || [],
+      poorFits: result.poorFits || [],
+    };
+  } catch (error) {
+    console.error("Error determining requirement fits:", error);
+    // Return empty fit categorizations if there's an error rather than failing entirely
+    return { potentialFits: [], poorFits: [] };
+  }
 }

@@ -28,6 +28,9 @@ export const analyses = pgTable("analyses", {
   approvedRequirements: jsonb("approved_requirements").notNull(),
   rejectedRequirements: jsonb("rejected_requirements").notNull(),
   content: text("content"),  // Store the extracted document text
+  bestFit: jsonb("best_fit"),  // Store the best matching requirement
+  potentialFits: jsonb("potential_fits"),  // Store requirements with moderate alignment
+  poorFits: jsonb("poor_fits"),  // Store requirements with minimal alignment
 });
 
 // Define the insert schema for analyses
@@ -70,6 +73,14 @@ export interface RejectedRequirement {
   missingSLOs: number[];
 }
 
+export interface RequirementFit {
+  name: string;
+  matchScore: number;  // 0-100 score indicating how well the requirements match
+  matchingSLOs: number[];
+  missingSLOs: number[];
+  reasoning: string;   // Explanation of why this is considered a good/potential/poor fit
+}
+
 export interface AnalysisResult {
   courseName: string;
   courseCode: string;
@@ -79,5 +90,9 @@ export interface AnalysisResult {
   uploadDate: Date;
   approvedRequirements: ApprovedRequirement[];
   rejectedRequirements: RejectedRequirement[];
+  // New fit categorization for better requirement analysis
+  bestFit?: RequirementFit;          // Single best matching requirement
+  potentialFits?: RequirementFit[];  // Requirements with moderate alignment
+  poorFits?: RequirementFit[];       // Requirements with minimal alignment
   analysisMethod?: "ai" | "keyword";  // 'ai' for OpenAI, 'keyword' for basic matching
 }
