@@ -131,10 +131,10 @@ export default function Database() {
                       Date Analyzed
                     </th>
                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-neutral-600 uppercase tracking-wider">
-                      Approved Requirements
+                      Best Fit(s)
                     </th>
                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-neutral-600 uppercase tracking-wider">
-                      Best Fit
+                      All Potential Fits
                     </th>
                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-neutral-600 uppercase tracking-wider">
                       File Type
@@ -167,26 +167,6 @@ export default function Database() {
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-5">
-                        <div className="flex flex-wrap gap-1.5">
-                          {Array.isArray(analysis.approvedRequirements) && analysis.approvedRequirements.map((req: any) => {
-                            // Use the shared utility function for consistent color coding
-                            const { bgColorClass, textColorClass } = getRequirementColors(req.name);
-                            
-                            return (
-                              <span 
-                                key={`${analysis.id}-${req.name}`}
-                                className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${bgColorClass} ${textColorClass}`}
-                              >
-                                {req.name}
-                              </span>
-                            );
-                          })}
-                          {(!analysis.approvedRequirements || !Array.isArray(analysis.approvedRequirements) || analysis.approvedRequirements.length === 0) && (
-                            <span className="text-sm text-neutral-500">None</span>
-                          )}
-                        </div>
-                      </td>
                       <td className="px-6 py-5 whitespace-nowrap">
                         {analysis.bestFit ? (
                           <div className="flex items-center">
@@ -206,6 +186,26 @@ export default function Database() {
                         ) : (
                           <span className="text-sm text-neutral-500">None identified</span>
                         )}
+                      </td>
+                      <td className="px-6 py-5">
+                        <div className="flex flex-wrap gap-1.5">
+                          {Array.isArray(analysis.approvedRequirements) && analysis.approvedRequirements.map((req: any) => {
+                            // Use the shared utility function for consistent color coding
+                            const { bgColorClass, textColorClass } = getRequirementColors(req.name);
+                            
+                            return (
+                              <span 
+                                key={`${analysis.id}-${req.name}`}
+                                className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${bgColorClass} ${textColorClass}`}
+                              >
+                                {req.name}
+                              </span>
+                            );
+                          })}
+                          {(!analysis.approvedRequirements || !Array.isArray(analysis.approvedRequirements) || analysis.approvedRequirements.length === 0) && (
+                            <span className="text-sm text-neutral-500">None</span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-5 whitespace-nowrap">
                         <div className="text-sm text-neutral-500">

@@ -276,8 +276,8 @@ export default function AnalysisResults({ result, isAnalyzing, isMultiple = fals
             {result.approvedRequirements.length > 0 && (
               <div className="mb-6">
                 <h3 className="font-medium text-neutral-900 mb-2 flex items-center">
-                  <span className="material-icons text-secondary mr-1">check_circle</span>
-                  Meets Requirements For
+                  <span className="material-icons text-green-500 mr-1">check_circle</span>
+                  Potential Fits
                 </h3>
                 
                 {result.approvedRequirements.map((req) => (
