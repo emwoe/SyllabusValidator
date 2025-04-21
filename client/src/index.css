@@ -34,6 +34,19 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.react-pdf__Page__textContent {
+  display: none !important;
+}
+
+.react-pdf__Page__annotations {
+  display: none !important;
+}
+
+/* Iframe PDF viewer */
+.pdf-viewer iframe {
+  background-color: white;
+}
+
 .document-viewer {
   position: relative;
 }
