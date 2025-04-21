@@ -119,38 +119,7 @@ export default function SyllabusView() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left column - Analysis details */}
         <div className="lg:col-span-1 space-y-6">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-medium">Document Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-start">
-                <FileText size={16} className="mr-2 mt-0.5 text-neutral-500" />
-                <div>
-                  <div className="font-medium">File Name</div>
-                  <div className="text-sm text-neutral-600">{fileName}</div>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <User size={16} className="mr-2 mt-0.5 text-neutral-500" />
-                <div>
-                  <div className="font-medium">Course</div>
-                  <div className="text-sm text-neutral-600">{courseTitle}</div>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <Clock size={16} className="mr-2 mt-0.5 text-neutral-500" />
-                <div>
-                  <div className="font-medium">Analyzed On</div>
-                  <div className="text-sm text-neutral-600">
-                    {formatDate(new Date(analysis.uploadDate))}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+
 
           <Card>
             <CardHeader className="pb-3">
@@ -303,20 +272,37 @@ export default function SyllabusView() {
                     </Badge>
                   )}
                 </div>
-                {documentPath && (
-                  <Button 
-                    variant="outline" 
-                    className="gap-1" 
-                    size="sm"
-                    onClick={() => window.open(`/api/documents/${documentPath}`, '_blank')}
-                  >
-                    <ExternalLink size={14} />
-                    View Original
-                  </Button>
-                )}
               </CardTitle>
             </CardHeader>
             <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 bg-gray-50 p-4 rounded-md border border-gray-100">
+                <div className="flex items-start">
+                  <FileText size={16} className="mr-2 mt-0.5 text-neutral-500" />
+                  <div>
+                    <div className="font-medium">File Name</div>
+                    <div className="text-sm text-neutral-600">{fileName}</div>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <User size={16} className="mr-2 mt-0.5 text-neutral-500" />
+                  <div>
+                    <div className="font-medium">Course</div>
+                    <div className="text-sm text-neutral-600">{courseTitle}</div>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <Clock size={16} className="mr-2 mt-0.5 text-neutral-500" />
+                  <div>
+                    <div className="font-medium">Analyzed On</div>
+                    <div className="text-sm text-neutral-600">
+                      {formatDate(new Date(analysis.uploadDate))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
               {isLoadingSyllabus ? (
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
@@ -328,7 +314,12 @@ export default function SyllabusView() {
               ) : syllabusText ? (
                 <div className="document-viewer">
                   {documentPath && fileType.toLowerCase() === '.pdf' ? (
-                    <PDFViewer url={`/api/documents/${documentPath}`} />
+                    <div>
+                      <PDFViewer 
+                        url={`/api/documents/${documentPath}`} 
+                        title={courseTitle} 
+                      />
+                    </div>
                   ) : (
                     <div className="p-6 bg-white rounded-md border shadow-sm max-h-[600px] overflow-y-auto document-scroll">
                       <div className={`
