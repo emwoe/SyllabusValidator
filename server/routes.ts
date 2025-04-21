@@ -82,7 +82,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         fileSize: file.size,
         fileType: path.extname(file.originalname).toLowerCase(),
         approvedRequirements: analysisResult.approvedRequirements,
-        rejectedRequirements: analysisResult.rejectedRequirements
+        rejectedRequirements: analysisResult.rejectedRequirements,
+        bestFit: analysisResult.bestFit,
+        potentialFits: analysisResult.potentialFits,
+        poorFits: analysisResult.poorFits
       };
 
       // Validate the data before storing
@@ -105,7 +108,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         fileSize: file.size,
         fileType: path.extname(file.originalname).toLowerCase(),
         uploadDate: savedAnalysis.uploadDate,
-        analysisMethod: analysisMethod
+        analysisMethod: analysisMethod,
+        bestFit: analysisResult.bestFit,
+        potentialFits: analysisResult.potentialFits,
+        poorFits: analysisResult.poorFits
       });
     } catch (error: any) {
       console.error("Error analyzing syllabus:", error);
