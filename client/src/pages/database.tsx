@@ -52,22 +52,40 @@ export default function Database() {
     
     // Generate CSV content
     let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Course Code,Course Name,Upload Date,File Type,Approved Requirements,Best Fit,Match Score\n";
+    csvContent += "Course Code,Course Name,Upload Date,File Type,Best Fit(s),Match Score(s),Other Potential Fits\n";
     
     analyses.forEach((analysis: Analysis) => {
-      const approvedReqs = Array.isArray(analysis.approvedRequirements)
-        ? analysis.approvedRequirements.map((req: any) => req.name).join('; ')
+      // Get best fits (primary + secondary)
+      const bestFits = [];
+      const matchScores = [];
+      
+      if (analysis.bestFit) {
+        bestFits.push((analysis.bestFit as RequirementFit).name);
+        matchScores.push((analysis.bestFit as RequirementFit).matchScore + '%');
+      }
+      
+      // Add secondary best fits (70%+ matches)
+      if (analysis.potentialFits && Array.isArray(analysis.potentialFits)) {
+        analysis.potentialFits
+          .filter((fit: RequirementFit) => fit.matchScore >= 70 && fit.name !== (analysis.bestFit as RequirementFit)?.name)
+          .forEach((fit: RequirementFit) => {
+            bestFits.push(fit.name);
+            matchScores.push(fit.matchScore + '%');
+          });
+      }
+      
+      // Get other potential fits (<70% matches)
+      const otherPotentialFits = analysis.potentialFits && Array.isArray(analysis.potentialFits)
+        ? analysis.potentialFits
+            .filter((fit: RequirementFit) => fit.matchScore < 70)
+            .map((fit: RequirementFit) => `${fit.name} (${fit.matchScore}%)`)
+            .join('; ')
         : '';
       
-      const bestFit = analysis.bestFit 
-        ? (analysis.bestFit as RequirementFit).name 
-        : '';
-        
-      const matchScore = analysis.bestFit 
-        ? (analysis.bestFit as RequirementFit).matchScore + '%' 
-        : '';
-        
-      csvContent += `"${analysis.courseCode}","${analysis.courseName}","${formatDate(new Date(analysis.uploadDate))}","${analysis.fileType}","${approvedReqs}","${bestFit}","${matchScore}"\n`;
+      const bestFitsStr = bestFits.join('; ');
+      const matchScoresStr = matchScores.join('; ');
+      
+      csvContent += `"${analysis.courseCode}","${analysis.courseName}","${formatDate(new Date(analysis.uploadDate))}","${analysis.fileType}","${bestFitsStr}","${matchScoresStr}","${otherPotentialFits}"\n`;
     });
     
     // Create download link
@@ -134,7 +152,7 @@ export default function Database() {
                       Best Fit(s)
                     </th>
                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-neutral-600 uppercase tracking-wider">
-                      All Potential Fits
+                      Other Potential Fits
                     </th>
                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-neutral-600 uppercase tracking-wider">
                       File Type
@@ -167,44 +185,82 @@ export default function Database() {
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-5 whitespace-nowrap">
-                        {analysis.bestFit ? (
-                          <div className="flex items-center">
+                      <td className="px-6 py-5">
+                        <div className="flex flex-col gap-1.5">
+                          {/* Primary Best Fit */}
+                          {analysis.bestFit ? (
                             <Badge 
                               variant="outline" 
-                              className="bg-blue-50 text-blue-700 border-blue-100 flex items-center gap-1.5"
+                              className="bg-blue-50 text-blue-700 border-blue-100 flex items-center gap-1.5 w-fit"
                             >
                               <Award size={12} className="text-blue-500" />
                               {(analysis.bestFit as RequirementFit).name}
-                              {(analysis.bestFit as RequirementFit).matchScore && (
+                              {(analysis.bestFit as RequirementFit).matchScore !== undefined && (
                                 <span className="text-blue-500 text-xs ml-1">
                                   {(analysis.bestFit as RequirementFit).matchScore}%
                                 </span>
                               )}
                             </Badge>
-                          </div>
-                        ) : (
-                          <span className="text-sm text-neutral-500">None identified</span>
-                        )}
+                          ) : (
+                            <span className="text-sm text-neutral-500">None identified</span>
+                          )}
+                          
+                          {/* Secondary Best Fits (70%+ matches) */}
+                          {analysis.potentialFits && Array.isArray(analysis.potentialFits) && 
+                           analysis.potentialFits
+                            .filter((fit: RequirementFit) => fit.matchScore >= 70 && fit.name !== (analysis.bestFit as RequirementFit)?.name)
+                            .map((fit: RequirementFit, idx: number) => (
+                              <Badge 
+                                key={`${analysis.id}-secondaryfit-${idx}`}
+                                variant="outline" 
+                                className="bg-blue-50/80 text-blue-700 border-blue-100 flex items-center gap-1.5 w-fit opacity-90"
+                              >
+                                {fit.name}
+                                <span className="text-blue-500 text-xs ml-1">{fit.matchScore}%</span>
+                              </Badge>
+                          ))}
+                        </div>
                       </td>
                       <td className="px-6 py-5">
                         <div className="flex flex-wrap gap-1.5">
-                          {Array.isArray(analysis.approvedRequirements) && analysis.approvedRequirements.map((req: any) => {
-                            // Use the shared utility function for consistent color coding
-                            const { bgColorClass, textColorClass } = getRequirementColors(req.name);
+                          {/* Get names of all best fits */}
+                          {(() => {
+                            const bestFitNames = [];
+                            if (analysis.bestFit) {
+                              bestFitNames.push((analysis.bestFit as RequirementFit).name);
+                            }
+                            if (analysis.potentialFits && Array.isArray(analysis.potentialFits)) {
+                              analysis.potentialFits
+                                .filter((fit: RequirementFit) => fit.matchScore >= 70)
+                                .forEach((fit: RequirementFit) => {
+                                  bestFitNames.push(fit.name);
+                                });
+                            }
                             
-                            return (
-                              <span 
-                                key={`${analysis.id}-${req.name}`}
-                                className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${bgColorClass} ${textColorClass}`}
-                              >
-                                {req.name}
-                              </span>
+                            // Filter out approved requirements that are not already in best fits
+                            const otherPotentialFits = analysis.potentialFits && Array.isArray(analysis.potentialFits)
+                              ? analysis.potentialFits.filter((fit: RequirementFit) => fit.matchScore < 70)
+                              : [];
+                              
+                            return otherPotentialFits.length > 0 ? (
+                              otherPotentialFits.map((fit: RequirementFit, idx: number) => {
+                                const { bgColorClass, textColorClass } = getRequirementColors(fit.name);
+                                const bgLighterClass = bgColorClass.replace('100', '50');
+                                
+                                return (
+                                  <span 
+                                    key={`${analysis.id}-otherpotential-${idx}`}
+                                    className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${bgLighterClass} ${textColorClass}`}
+                                  >
+                                    {fit.name}
+                                    <span className="text-xs ml-1 opacity-75">{fit.matchScore}%</span>
+                                  </span>
+                                );
+                              })
+                            ) : (
+                              <span className="text-sm text-neutral-500">None</span>
                             );
-                          })}
-                          {(!analysis.approvedRequirements || !Array.isArray(analysis.approvedRequirements) || analysis.approvedRequirements.length === 0) && (
-                            <span className="text-sm text-neutral-500">None</span>
-                          )}
+                          })()}
                         </div>
                       </td>
                       <td className="px-6 py-5 whitespace-nowrap">
