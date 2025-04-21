@@ -8,6 +8,7 @@ import fs from "fs";
 import { extractTextFromDocument } from "./utils/documentParser";
 import { analyzeGenEdRequirements, genEdRequirements } from "./utils/genEdAnalyzer";
 import { analyzeWithOpenAI } from "./utils/openaiAnalyzer";
+import { processPDFForWeb, isPDF } from "./utils/pdfOptimizer";
 
 // Set up multer for file uploads
 const upload = multer({
@@ -102,13 +103,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate document ID and path for storage
       const documentId = Date.now() + '-' + Math.round(Math.random() * 1E9);
       const storedFilename = `document-${documentId}${path.extname(file.originalname)}`;
-      const storedPath = path.join(documentsDir, storedFilename);
       
-      // Save a copy of the original file in the documents directory
-      fs.copyFileSync(file.path, storedPath);
+      // Process PDF files for web optimization if applicable
+      let finalStoredFilename = storedFilename;
+      if (isPDF(file.path)) {
+        console.log('Processing PDF for web optimization...');
+        finalStoredFilename = processPDFForWeb(file.path, documentsDir, storedFilename);
+      } else {
+        // For non-PDF files, just copy as-is
+        const storedPath = path.join(documentsDir, storedFilename);
+        fs.copyFileSync(file.path, storedPath);
+      }
       
       // Add the document path to the analysis data
-      parsedData.documentPath = storedFilename;
+      parsedData.documentPath = finalStoredFilename;
       
       // Store the analysis in the database
       const savedAnalysis = await storage.createAnalysis(parsedData);
@@ -258,13 +266,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Generate document ID and path for storage
           const documentId = Date.now() + '-' + Math.round(Math.random() * 1E9);
           const storedFilename = `document-${documentId}${path.extname(file.originalname)}`;
-          const storedPath = path.join(documentsDir, storedFilename);
           
-          // Save a copy of the original file in the documents directory
-          fs.copyFileSync(file.path, storedPath);
+          // Process PDF files for web optimization if applicable
+          let finalStoredFilename = storedFilename;
+          if (isPDF(file.path)) {
+            console.log(`Processing PDF for web optimization: ${file.originalname}`);
+            finalStoredFilename = processPDFForWeb(file.path, documentsDir, storedFilename);
+          } else {
+            // For non-PDF files, just copy as-is
+            const storedPath = path.join(documentsDir, storedFilename);
+            fs.copyFileSync(file.path, storedPath);
+          }
           
           // Add the document path to the analysis data
-          parsedData.documentPath = storedFilename;
+          parsedData.documentPath = finalStoredFilename;
           
           // Store the analysis in the database
           const savedAnalysis = await storage.createAnalysis(parsedData);
@@ -285,7 +300,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             potentialFits: analysisResult.potentialFits,
             poorFits: analysisResult.poorFits,
             content: text, // Include the extracted text
-            documentPath: storedFilename // Include the document path
+            documentPath: finalStoredFilename // Include the document path
           });
           
           // Clean up the temporary uploaded file
