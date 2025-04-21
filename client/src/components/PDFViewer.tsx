@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Download, FileText, AlertTriangle } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { ExternalLink, Download, AlertTriangle } from 'lucide-react';
 
 interface PDFViewerProps {
   url: string;
@@ -9,7 +8,6 @@ interface PDFViewerProps {
 }
 
 export default function PDFViewer({ url, title }: PDFViewerProps) {
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function openInNewTab() {
@@ -47,48 +45,30 @@ export default function PDFViewer({ url, title }: PDFViewerProps) {
 
   return (
     <div className="pdf-viewer">
-      <Card>
-        <CardHeader>
-          <CardTitle>{title || "Document"}</CardTitle>
-          <CardDescription>PDF Document</CardDescription>
-        </CardHeader>
+      <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <Button 
+          variant="outline" 
+          onClick={downloadFile}
+          className="gap-2"
+          size="lg"
+        >
+          <Download size={18} />
+          Download Syllabus
+        </Button>
         
-        <CardContent className="flex items-center justify-center p-6 bg-gray-50">
-          <div className="flex flex-col items-center justify-center w-full">
-            <div className="w-36 h-48 bg-white border border-gray-200 rounded-sm shadow-sm mb-4 relative flex flex-col items-center justify-center overflow-hidden">
-              <div className="absolute top-0 w-full h-1 bg-red-600"></div>
-              <FileText className="text-gray-400 mb-2" size={48} />
-              <div className="text-xs text-gray-500 px-2 text-center">Document Preview</div>
-              <div className="absolute right-0 bottom-0 bg-red-600 text-white text-xs px-1 py-0.5 rounded-tl-sm font-medium">PDF</div>
-            </div>
-            <p className="text-sm text-gray-500 text-center max-w-sm truncate">{title || "Document"}</p>
-          </div>
-        </CardContent>
-        
-        <CardFooter className="flex justify-between">
-          <Button 
-            variant="outline" 
-            onClick={downloadFile}
-            className="gap-2"
-          >
-            <Download size={16} />
-            Download
-          </Button>
-          
-          <Button 
-            onClick={openInNewTab}
-            className="gap-2"
-          >
-            <ExternalLink size={16} />
-            View PDF
-          </Button>
-        </CardFooter>
-      </Card>
+        <Button 
+          onClick={openInNewTab}
+          className="gap-2"
+          size="lg"
+        >
+          <ExternalLink size={18} />
+          View Syllabus
+        </Button>
+      </div>
       
       <div className="mt-4 pt-4 border-t border-gray-100">
-        <p className="text-sm text-gray-500">
-          This PDF document is available for <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">direct viewing</a> or download. 
-          If you have trouble viewing the document, try downloading it first.
+        <p className="text-sm text-gray-500 text-center">
+          This PDF document is available for viewing or download. If you have trouble viewing the document in your browser, try downloading it first.
         </p>
       </div>
     </div>

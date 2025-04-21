@@ -23,7 +23,7 @@
 }
 
 /* PDF Viewer styling */
-.pdf-viewer .card {
+.pdf-viewer {
   max-width: 800px;
   margin: 0 auto;
 }
