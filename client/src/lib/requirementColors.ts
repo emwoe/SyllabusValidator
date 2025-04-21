@@ -68,8 +68,8 @@ export function getRequirementColors(requirementName: string): RequirementColors
     // Mission markers
     case "Writing Rich Mission Marker":
       return {
-        bgColorClass: "bg-fuchsia-100",
-        textColorClass: "text-fuchsia-800"
+        bgColorClass: "bg-lime-100",
+        textColorClass: "text-lime-800"
       };
     case "Social Identities Mission Marker":
       return {

@@ -175,7 +175,7 @@ export const genEdRequirements: GenEdRequirement[] = [
     ]
   },
   {
-    name: "Writing Rich Mission Markers",
+    name: "Writing Rich Mission Marker",
     description: "Students develop advanced writing skills through substantial discipline-specific writing.",
     slos: [
       "Write discipline-specific texts for multiple purposes and audiences.",
